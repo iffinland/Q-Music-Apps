@@ -1,0 +1,485 @@
+/* src/App.css - TÄIELIK JA PARANDATUD VERSIOON */
+
+/* ==========================================================================
+   1. ÜLDINE LEHE STIIL JA VÄRVISKEEM
+   ========================================================================== */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+/* ==========================================================================
+   2. RAKENDUSE PÕHISTRUKTUUR
+   ========================================================================== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden; 
+}
+
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  /* OLULINE: Väldime sellel elemendil enda sisu tõttu laienemist */
+  min-width: 0; 
+}
+
+/* ==========================================================================
+   3. KÜLGRIBA (Sidebar)
+   ========================================================================== */
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background-color: #040404;
+  padding: 1.5rem;
+  overflow-y: auto;
+  border-left: 1px solid #282828;
+}
+
+.stats-section, .user-section {
+  margin-bottom: 2rem;
+}
+.stats-section h4 {
+  margin-top: 0;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.stats-section p {
+  margin: 0.5rem 0;
+  color: #b3b3b3;
+}
+.user-avatar {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.user-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #333;
+}
+.user-name {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* ==========================================================================
+   4. HEADER JA PLAYER
+   ========================================================================== */
+/* Headeri stiilid (siia võid lisada headeriga seotud reeglid, kui need on olemas) */
+.app-header {
+  background-color: #282828;
+  padding: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-bottom: 1px solid #3c3c3c;
+}
+/* ... lisa siia oma ülejäänud headeri, otsingu ja nuppude stiilid, kui need pole mujal ... */
+
+
+/* Playeri stiilid */
+/* Playeri riba all */
+.player-bar {
+  height: 90px;
+  flex-shrink: 0;
+  background-color: #181818;
+  border-top: 1px solid #282828;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* 3-osaline paigutus */
+  align-items: center;
+  padding: 0 1rem;
+  gap: 2rem;
+}
+
+.player-song-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.player-song-info strong {
+  font-size: 0.9em;
+}
+.player-song-info p {
+  font-size: 0.8em;
+  color: #b3b3b3;
+  margin: 0;
+}
+
+.player-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.play-pause-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+.play-pause-btn:hover {
+  transform: scale(1.1);
+}
+.play-pause-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  font-size: 0.8em;
+  color: #b3b3b3;
+}
+
+.progress-bar {
+  -webkit-appearance: none; /* WebKit brauserite jaoks */
+  appearance: none; /* **** LISA SEE RIDA (standardne versioon) **** */
+  width: 100%;
+  height: 4px;
+  background: #4d4d4d;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity .2s;
+  border-radius: 5px;
+}
+.progress-bar:hover {
+  opacity: 1;
+}
+.progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.progress-bar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* player volume control styles */
+.player-volume-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: 150px; /* Anname kindla laiuse, et paigutus ei hüppaks */
+}
+
+.volume-btn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+.volume-btn:hover {
+  color: #fff;
+}
+
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px; /* Liuguri laius */
+  height: 4px;
+  background: #4d4d4d;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity .2s;
+  border-radius: 5px;
+}
+.volume-slider:hover {
+  opacity: 1;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   5. LEHTEDE STIILID (pages/*.jsx)
+   ========================================================================== */
+/* Lehe-spetsiifilised konteinerid (need on main-content SEES) */
+.page-container, .form-page-container, .homepage {
+  width: 100%;
+  max-width: 1200px; /* Saame seda väärtust muuta vastavalt vajadusele */
+  margin: 0 auto; /* Tsentreerib sisu main-content ala sees */
+}
+
+/* Jätame alles ainult vormide konteineri piiramise, sest vormid ei pea olema täislaiuses */
+.form-page-container {
+  max-width: 700px;
+  margin: 2rem auto; /* Tsentreerib vormi ennast, aga mitte tervet lehte */
+}
+
+/* Spetsiifiliselt otsingutulemuste lehele, et see ei oleks liiga lai */
+.search-results-page { /* Selle klassinime pead lisama SearchResultsPage.jsx-i */
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* **** SIIN ON PARANDUS JA LISATUD KOOD **** */
+
+.horizontal-scroll-section {
+  margin-bottom: 2.5rem;
+}
+.horizontal-scroll-section h2 {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+/* Stiilid laulu- ja playlisti-kaartidele, mis on horisontaalses reas */
+.song-item, .playlist-card {
+  flex: 0 0 160px; /* Fikseeritud laius: ei kasva, ei kahane, baaslaius 160px */
+  background-color: #181818;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  overflow: hidden;
+}
+.song-item:hover, .playlist-card:hover {
+  background-color: #282828;
+}
+/* **** PARANDUS LÕPPEB SIIN **** */
+
+
+/* ==========================================================================
+   6. RESPONSIIVNE DISAIN (Mobiilivaade)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    order: -1;
+    border-left: none;
+    border-bottom: 1px solid #282828;
+    height: auto;
+    overflow-y: visible;
+    padding: 1rem;
+  }
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+/* --- PARANDUS HORISONTAALSETE RIDADE JAOKS --- */
+
+/* Konteiner, mis teeb sisu horisontaalseks ja keritavaks */
+.horizontal-music-list, .horizontal-playlist-grid {
+  display: flex;
+  overflow-x: auto; /* Luba horisontaalne kerimine */
+  gap: 1.5rem;
+  padding: 1rem 0.5rem; /* Lisame veidi paddingut, et kaardid ei oleks ääres kinni */
+
+  /* Esteetiline täiustus kerimisribale */
+  scrollbar-width: thin;
+  scrollbar-color: #555 #1a1a1a;
+}  
+
+/* Stiilid laulu- ja playlisti-kaartidele, mis on horisontaalses reas */
+/* .song-item ja .playlist-card peavad olema olemas, see on spetsiifilisem reegel */
+.horizontal-music-list .song-item, 
+.horizontal-playlist-grid .playlist-card {
+  flex: 0 0 160px; /* Fikseeritud laius: ei kasva, ei kahane */
+  /* Siia võid lisada veel stiile, nt background-color, border-radius jne */
+}
+
+/* --- BROWSE SONGS --- */
+/* Lisa see oma App.css faili lõppu */
+
+.browse-page h2 {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 1rem;
+}
+
+/* See reegel muudab MusicListi välimust AINULT sirvimise lehel */
+.song-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Eemaldame song-item'ilt fikseeritud laiuse, kui see on grid'i sees */
+.song-grid .song-item {
+  flex: none; /* Nullime flex omadused */
+  width: auto; /* Laseme gridil laiuse määrata */
+}
+
+/* --- Browse Playlist --- */
+/* Lisa see App.css lõppu */
+
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+
+.playlist-card {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #181818;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: background-color 0.2s;
+}
+.playlist-card:hover {
+  background-color: #282828;
+}
+
+.playlist-card h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.playlist-card p {
+  margin: 0;
+  color: #b3b3b3;
+}
+
+.playlist-owner {
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 1rem;
+}
+
+/* PlaylistDetailPage styles */
+.playlist-detail-page .playlist-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #333;
+}
+
+.playlist-detail-page .playlist-info h1 {
+  font-size: 3rem;
+  margin: 0.5rem 0;
+}
+
+.playlist-detail-page .playlist-info p {
+  margin: 0;
+  color: #b3b3b3;
+}
+
+.playlist-detail-page .playlist-info span {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+/* See muudab MusicListi vertikaalseks nimekirjaks sellel lehel */
+.vertical-music-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vertical-music-list .song-item {
+  flex: 1 1 auto;
+  width: auto;
+  background-color: transparent;
+  text-align: left;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+.vertical-music-list .song-item:hover {
+  background-color: #282828;
+}
+
+/* SongDetailPage styles */
+.song-detail-page .song-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.song-detail-page .song-artwork img {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+}
+
+.song-detail-page .song-info h1 {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+}
+
+.song-detail-page .song-info p {
+  margin: 0;
+  color: #b3b3b3;
+}
+
+.play-button {
+  margin-top: 1rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #1DB954; /* Spotify roheline */
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+.play-button:hover {
+  transform: scale(1.05);
+}
+
+.song-details-body {
+  padding-top: 2rem;
+  border-top: 1px solid #333;
+}
