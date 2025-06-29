@@ -166,11 +166,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Otsingukast paremal */
-.header-search-container {
-  /* Siia saame lisada stiilid, kui tahame otsingukasti välimust muuta */
-}
-
 /* Teine rida sisselogitud kasutaja "Lisa..." nuppude jaoks */
 .header-action-buttons {
   display: flex;
