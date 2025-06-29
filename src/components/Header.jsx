@@ -11,7 +11,7 @@ function Header({ isLoggedIn, currentUser, onLoginClick, onLogoutClick, onSearch
         <nav>
           <Link to="/songs" style={{color: 'white', marginRight: '1rem'}}>Sirvi Lugusid</Link>
           <Link to="/playlists" style={{color: 'white', marginRight: '1rem'}}>Sirvi Playliste</Link>
-          <Link to="/song/song-1" style={{color: 'yellow', marginRight: '1rem'}}>Testi Laulu</Link>
+          <Link to="/song/song-1" style={{color: 'white', marginRight: '1rem'}}>Testi Laulu</Link>
         </nav>
         <nav className="header-auth-nav">
           {isLoggedIn && currentUser ? (
