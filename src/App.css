@@ -111,7 +111,7 @@ body {
   font-size: 1.5rem;
 }
 .logo-link {
-  color: white;
+  color: rgb(81, 200, 230);
   text-decoration: none;
 }
 .header-nav {
@@ -120,7 +120,7 @@ body {
   gap: 0.5rem;
 }
 .header-link {
-  color: #b3b3b3;
+  color: #756b6b;
   text-decoration: none;
   padding: 0.75rem 1rem;
   border-radius: 4px;
@@ -128,12 +128,12 @@ body {
   transition: background-color 0.2s, color 0.2s;
 }
 .header-link:hover {
-  background-color: #3c3c3c;
-  color: #fff;
+  background-color: #535353;
+  color: #1ce202;
 }
 .header-link.active {
   background-color: #535353;
-  color: #fff;
+  color: #bfd308;
 }
 .header-actions {
   display: flex;
