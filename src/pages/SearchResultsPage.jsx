@@ -1,82 +1,96 @@
-// src/pages/SearchResultsPage.jsx
+// src/pages/SearchResultsPage.jsx - PÄRIS OTSINGUFUNKTSIONAALSUSEGA
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom'; // Hook URL-i query parameetrite lugemiseks
-// import MusicList from '../components/MusicList'; // Võid seda kasutada tulemuste kuvamiseks
-// import PlaylistGrid from '../components/PlaylistGrid';
+import { useSearchParams } from 'react-router-dom';
+import MusicList from '../components/MusicList'; // Kasutame laulude kuvamiseks
 
-function SearchResultsPage() {
+/* global qortalRequest */
+
+// See leht vajab onSongSelect funktsiooni, et playerit uuendada.
+// Peame selle App.jsx-ist edasi andma.
+function SearchResultsPage({ onSongSelect = () => {} }) {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q'); // Hangi 'q' parameeter URL-ist
 
-  const [songResults, setSongResults] = useState([]);
-  const [playlistResults, setPlaylistResults] = useState([]);
+  const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Käivitame otsingu ainult siis, kui URL-is on otsingusõna
     if (query) {
-      setIsLoading(true);
-      console.log(`Otsin tulemusi päringule: "${query}" (API kutse tuleks siia)`);
-      // TODO: Siia tuleb API kutse Qortalist otsingutulemuste saamiseks
-      // fetchSearchResults(query).then(data => {
-      //   setSongResults(data.songs || []);
-      //   setPlaylistResults(data.playlists || []);
-      //   setIsLoading(false);
-      // }).catch(error => {
-      //   console.error("Otsingu viga:", error);
-      //   setIsLoading(false);
-      // });
+      const performSearch = async () => {
+        setIsLoading(true);
+        setError(null);
+        setResults([]);
 
-      // Ajutine mock-tulemused
-      setTimeout(() => {
-        setSongResults([
-          { id: 101, title: `Laul vastega "${query}" 1`, artist: "Otsingu Artist", duration: "3:30" },
-          { id: 102, title: `Teine laul "${query}"`, artist: "Teine Artist", duration: "4:00" },
-        ]);
-        setPlaylistResults([
-          { id: 201, name: `Playlist "${query}"`, songCount: 5 },
-        ]);
-        setIsLoading(false);
-      }, 1000);
+        if (typeof qortalRequest === 'undefined') {
+          setError("Qortali API pole kättesaadav.");
+          setIsLoading(false);
+          return;
+        }
+
+        try {
+          console.log(`Otsin QDN-ist päringuga: "${query}"`);
+
+          const requestObject = {
+            action: "SEARCH_QDN_RESOURCES",
+            query: query, // Üldine otsingusõna
+            service: "AUDIO",
+            includeMetadata: true,
+            limit: 50, // Näitame kuni 50 vastet
+            reverse: true, // Uusimad esimesena
+          };
+
+          const searchResults = await qortalRequest(requestObject);
+          console.log("Otsingu API vastus:", searchResults);
+
+          if (Array.isArray(searchResults) && searchResults.length > 0) {
+            const formattedResults = searchResults.map(item => {
+              let finalArtist = item.name || "Tundmatu Esitaja";
+              if (item.metadata?.description?.includes('artist=')) {
+                const artistMatch = item.metadata.description.match(/artist=([^;]+)/);
+                if (artistMatch?.[1]) finalArtist = artistMatch[1].trim();
+              }
+              return {
+                id: item.identifier,
+                title: item.metadata?.title || item.identifier,
+                artist: finalArtist,
+                qdnData: { name: item.name, service: item.service, identifier: item.identifier }
+              };
+            });
+            setResults(formattedResults);
+          } else {
+            setResults([]); // Tulemusi ei leitud
+          }
+        } catch (e) {
+          console.error("Otsingu viga:", e);
+          setError(`Otsing ebaõnnestus: ${e.message}`);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      performSearch();
     }
-  }, [query]); // Käivita uuesti, kui 'query' muutub
-
-  if (isLoading) {
-    return <p>Otsin tulemusi...</p>;
-  }
-
-  if (!query) {
-    return <p>Palun sisesta otsingusõna.</p>;
-  }
+  }, [query]); // Käivita uuesti AINULT siis, kui 'query' URL-is muutub
 
   return (
-    <div>
-      <h2>Otsingutulemused päringule: "{query}"</h2>
-
-      {songResults.length > 0 && (
-        <section>
-          <h3>Laulud</h3>
-          {/* Võid siin kasutada MusicList komponenti, kui see on sobivaks refaktoreeritud */}
-          <ul>
-            {songResults.map(song => (
-              <li key={song.id}>{song.title} - {song.artist}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {playlistResults.length > 0 && (
-        <section style={{marginTop: '2rem'}}>
-          <h3>Playlistid</h3>
-          <ul>
-            {playlistResults.map(pl => (
-              <li key={pl.id}>{pl.name} ({pl.songCount} laulu)</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {songResults.length === 0 && playlistResults.length === 0 && !isLoading && (
-        <p>Ei leidnud tulemusi päringule "{query}".</p>
+    <div className="page-container search-results-page">
+      {query ? (
+        <>
+          <h2>Otsingutulemused päringule: "{query}"</h2>
+          <div className="browse-results">
+            {isLoading && <p>Otsin...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {!isLoading && !error && results.length === 0 && <p>Selle päringuga ei leitud ühtegi lugu.</p>}
+            {!isLoading && !error && results.length > 0 && (
+              // Kasutame sama song-grid stiili, mis sirvimise lehel
+              <MusicList songsData={results} onSongSelect={onSongSelect} listClassName="song-grid" />
+            )}
+          </div>
+        </>
+      ) : (
+        <h2>Palun sisesta otsingusõna headeris olevasse kasti.</h2>
       )}
     </div>
   );

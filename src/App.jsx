@@ -89,7 +89,7 @@ function App() {
             <Route path="/" element={<HomePage onSongSelect={handleSelectSong} />} />
             <Route path="/add-music" element={isLoggedIn ? <AddMusicPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" />} />
-            <Route path="/search" element={<SearchResultsPage />} />
+            <Route path="/search" element={<SearchResultsPage onSongSelect={handleSelectSong} />} />
             <Route path="/songs" element={<BrowseSongsPage onSongSelect={handleSelectSong} />} />
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />
             <Route path="/playlist/:playlistId" element={<PlaylistDetailPage onSongSelect={handleSelectSong} />} />
