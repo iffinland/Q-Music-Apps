@@ -1,4 +1,4 @@
-// src/App.jsx - TAGASI LIHTSA JA TÖÖTAVA VERSIOONI JUURDE
+// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 
@@ -22,25 +22,20 @@ import './App.css';
 /* global qortalRequest */
 
 function AppWrapper() {
-  return (
-    <HashRouter>
-      <App />
-    </HashRouter>
-  );
+  return ( <HashRouter> <App /> </HashRouter> );
 }
 
 function App() {
   const navigate = useNavigate();
-
-  // Olek
   const [songs, setSongs] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
+  // See useEffect on nüüd ainult mock-andmete jaoks, kui API kutse ebaõnnestub.
+  // HomePage teeb ise oma API kutse.
   useEffect(() => { setSongs(initialMockSongs); }, []);
 
-  // Handlerid
   const handleSelectSong = (song) => setSelectedSong(song);
   const actualSearchHandler = (searchTerm) => { if (searchTerm.trim()) navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`); };
   
@@ -91,11 +86,11 @@ function App() {
       <div className="content-wrapper">
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<HomePage songs={songs} onSongSelect={handleSelectSong} />} />
-            <Route path="/add-music" element={isLoggedIn ? <AddMusicPage currentUser={currentUser} /> : <Navigate to="/" replace />} />
-            <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" replace />} />
+            <Route path="/" element={<HomePage onSongSelect={handleSelectSong} />} />
+            <Route path="/add-music" element={isLoggedIn ? <AddMusicPage currentUser={currentUser} /> : <Navigate to="/" />} />
+            <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/search" element={<SearchResultsPage />} />
-            <Route path="/songs" element={<BrowseSongsPage songs={songs} onSongSelect={handleSelectSong} />} />
+            <Route path="/songs" element={<BrowseSongsPage onSongSelect={handleSelectSong} />} />
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />
             <Route path="/playlist/:playlistId" element={<PlaylistDetailPage onSongSelect={handleSelectSong} />} />
             <Route path="/song/:songId" element={<SongDetailPage onSongSelect={handleSelectSong} />} />
