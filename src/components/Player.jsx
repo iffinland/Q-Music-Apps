@@ -1,4 +1,4 @@
-// src/components/Player.jsx - LÕPLIK KOOS HELITUGEVUSEGA
+// src/components/Player.jsx - KASUTAB BASE64 ANDMEID
 import React, { useState, useEffect, useRef } from 'react';
 /* global qortalRequest */
 
@@ -6,7 +6,6 @@ const PlayIcon = () => ( <svg width="24" height="24" viewBox="0 0 24 24"><path f
 const PauseIcon = () => ( <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" /></svg> );
 const VolumeHighIcon = () => ( <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" /></svg> );
 const VolumeMuteIcon = () => ( <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21.19,21.19L2.81,2.81L1.39,4.22L7.22,10.05L7,10H3V14H7L12,19V13.22L16.2,17.42C15.75,17.72 15.27,17.96 14.77,18.11L14.76,18.12L14,18.7V20.77C15.06,20.44 16.03,19.83 16.85,19.03L19.97,22.15L21.39,20.73L21.19,21.19V21.19M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,15 21,13.57 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M14,7.97V10.18L15.48,11.66C15.5,11.78 15.5,11.89 15.5,12C15.5,13.76 14.5,15.29 13.03,16.04L14,17.01V16V7.97Z" /></svg> );
-
 const formatTime = (time) => { if (isNaN(time) || !isFinite(time)) return '0:00'; const minutes = Math.floor(time / 60); const seconds = Math.floor(time % 60).toString().padStart(2, '0'); return `${minutes}:${seconds}`; };
 
 function Player({ currentSong }) {
@@ -40,9 +39,7 @@ function Player({ currentSong }) {
     if (currentSong) loadAndPlaySong();
   }, [currentSong]);
 
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
+  useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
 
   const togglePlayPause = () => { if (!audioRef.current?.src || isLoadingSong) return; if (isPlaying) audioRef.current.pause(); else audioRef.current.play(); setIsPlaying(!isPlaying); };
   const handleTimeUpdate = () => setCurrentTime(audioRef.current.currentTime);
