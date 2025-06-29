@@ -398,7 +398,7 @@ body {
 /* ==========================================================================
    6. RESPONSIIVNE DISAIN (Mobiilivaade)
    ========================================================================== */
-@media (max-width: 900px) {
+@media (max-width: 720px) {
   .content-wrapper {
     flex-direction: column;
   }
