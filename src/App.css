@@ -647,3 +647,42 @@ Laulukaardi pildi konteiner
   gap: 1rem;
   min-width: 180px; /* Anname miinimumlaiuse */
 }
+
+/* ===========================================================================
+SIDEBAR STATS styles
+=============================================================== */
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.stats-header h4 {
+  margin: 0; /* Eemaldame vaikimisi marginaalid */
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 0; /* Et ikoon oleks kenasti keskel */
+  border-radius: 4px;
+}
+.refresh-btn:hover:not(:disabled) {
+  color: #fff;
+  background-color: #333;
+}
+.refresh-btn:disabled {
+  cursor: not-allowed;
+  animation: spin 1s linear infinite; /* Lisame laadimise animatsiooni */
+}
+
+/* Animatsioon laadimise jaoks */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
