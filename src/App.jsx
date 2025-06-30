@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 
-// Komponendid ja lehed
+// Komponentide ja lehtede impordid...
 import Header from './components/Header';
 import Player from './components/Player';
 import Sidebar from './components/Sidebar';
@@ -15,27 +15,31 @@ import BrowsePlaylistsPage from './pages/BrowsePlaylistsPage';
 import PlaylistDetailPage from './pages/PlaylistDetailPage';
 import SongDetailPage from './pages/SongDetailPage';
 
-// Andmed ja stiilid
 import { songs as initialMockSongs } from "./data/mockSongs";
 import './App.css';
 
 /* global qortalRequest */
 
 function AppWrapper() {
-  return ( <HashRouter> <App /> </HashRouter> );
+  return (
+    <HashRouter>
+      <App />
+    </HashRouter>
+  );
 }
 
 function App() {
   const navigate = useNavigate();
+  
+  // Kogu rakenduse olek on siin
   const [songs, setSongs] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // See useEffect on nüüd ainult mock-andmete jaoks, kui API kutse ebaõnnestub.
-  // HomePage teeb ise oma API kutse.
   useEffect(() => { setSongs(initialMockSongs); }, []);
 
+  // Kõik handler-funktsioonid on siin
   const handleSelectSong = (song) => setSelectedSong(song);
   const actualSearchHandler = (searchTerm) => { if (searchTerm.trim()) navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`); };
   
@@ -82,14 +86,13 @@ function App() {
         onSearchSubmit={actualSearchHandler}
         onNavigateToAction={handleNavigateToAction}
       />
-      
       <div className="content-wrapper">
         <main className="main-content">
           <Routes>
             <Route path="/" element={<HomePage onSongSelect={handleSelectSong} />} />
             <Route path="/add-music" element={isLoggedIn ? <AddMusicPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" />} />
-            <Route path="/search" element={<SearchResultsPage onSongSelect={handleSelectSong} />} />
+            <Route path="/search" element={<SearchResultsPage onSongSelect={handleSelectSong}/>} />
             <Route path="/songs" element={<BrowseSongsPage onSongSelect={handleSelectSong} />} />
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />
             <Route path="/playlist/:playlistId" element={<PlaylistDetailPage onSongSelect={handleSelectSong} />} />
@@ -97,16 +100,10 @@ function App() {
             <Route path="*" element={<div><h2>404</h2></div>} />
           </Routes>
         </main>
-        
-        <Sidebar 
-          isLoggedIn={isLoggedIn} 
-          currentUser={currentUser}
-        />
+        <Sidebar isLoggedIn={isLoggedIn} currentUser={currentUser} />
       </div>
-
       <Player currentSong={selectedSong} />
     </div>
   );
 }
-
 export default AppWrapper;
