@@ -1,35 +1,32 @@
-// src/pages/BrowseSongsPage.jsx - PÄRIS ANDMETEGA, PAGINEERIMISE JA FILTRIGA
+// src/pages/BrowseSongsPage.jsx - PARANDATUD
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import MusicList from '../components/MusicList';
 
 /* global qortalRequest */
 
 function BrowseSongsPage({ onSongSelect = () => {} }) {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // Olekud
   const [songs, setSongs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Loeme parameetrid URL-ist või kasutame vaikeväärtusi
+  const [totalSongs, setTotalSongs] = useState(0)
+  
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const currentLetter = searchParams.get('letter') || 'ALL';
-  const limit = 50; // Mitu laulu lehel
-
+  const limit = 50;
+  
   useEffect(() => {
     const fetchPaginatedSongs = async () => {
       setIsLoading(true);
       setError(null);
-      setSongs([]);
-
+      
       if (typeof qortalRequest === 'undefined') {
-        setError("Qortali API pole kättesaadav. See rakendus töötab ainult Qortali keskkonnas.");
+        setError("Qortali API pole kättesaadav.");
         setIsLoading(false);
         return;
       }
-
+      
       try {
         const offset = (currentPage - 1) * limit;
         
@@ -42,19 +39,16 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
           reverse: true,
           excludeBlocked: true,
         };
-
-        // Lisame tähefiltri parameetrid, kui täht on valitud
+        
         if (currentLetter !== 'ALL') {
           requestObject.name = currentLetter;
           requestObject.prefix = true;
           requestObject.exactMatchNames = false;
         }
 
-        console.log("Saadan QDN-i päringu:", requestObject);
         const results = await qortalRequest(requestObject);
-        console.log("Sain QDN-ist vastuseks:", results);
-
-        if (Array.isArray(results) && results.length > 0) {
+        if (Array.isArray(results)) {
+          setTotalSongs(results.length)
           const formatted = results.map(item => {
             let finalArtist = item.name || "Tundmatu Esitaja";
             if (item.metadata?.description?.includes('artist=')) {
@@ -65,7 +59,8 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
               id: item.identifier,
               title: item.metadata?.title || item.identifier,
               artist: finalArtist,
-              qdnData: { name: item.name, service: item.service, identifier: item.identifier }
+              qdnData: { name: item.name, service: item.service, identifier: item.identifier },
+              artworkUrl: `/thumbnail/${item.name}/${item.identifier}`
             };
           });
           setSongs(formatted);
@@ -73,62 +68,40 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
           setSongs([]);
         }
       } catch (e) {
-        console.error("Laulude pärimisel tekkis viga:", e);
         setError(`Viga andmete laadimisel: ${e.message}`);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     fetchPaginatedSongs();
-  }, [currentPage, currentLetter]); // Sõltuvused
+  }, [currentPage, currentLetter]);
 
-  // Navigeerimisfunktsioonid
   const handlePageChange = (newPage) => {
-    if (newPage >= 1) {
-      setSearchParams({ page: newPage.toString(), letter: currentLetter });
-    }
+    if (newPage >= 1) setSearchParams({ page: newPage.toString(), letter: currentLetter });
   };
   const handleLetterChange = (newLetter) => {
     setSearchParams({ page: '1', letter: newLetter });
   };
-
+  
   const alphabet = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
-
+  
   return (
     <div className="page-container browse-page">
       <h2>Sirvi Kõiki Lugusid</h2>
-
       <div className="alphabet-filter">
-        {alphabet.map(letter => (
-          <button
-            key={letter}
-            className={currentLetter === letter ? 'active' : ''}
-            onClick={() => handleLetterChange(letter)}
-            disabled={isLoading}
-          >
-            {letter}
-          </button>
-        ))}
+        {alphabet.map(letter => ( <button key={letter} className={currentLetter === letter ? 'active' : ''} onClick={() => handleLetterChange(letter)} disabled={isLoading} >{letter}</button> ))}
       </div>
-
       <div className="browse-results">
         {isLoading && <p>Laen lugusid...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {!isLoading && !error && songs.length === 0 && <p>Selle valikuga laule ei leitud.</p>}
-        {!isLoading && !error && songs.length > 0 && (
-          <MusicList songsData={songs} onSongSelect={onSongSelect} listClassName="song-grid" />
-        )}
+        {!isLoading && !error && songs.length > 0 && ( <MusicList songsData={songs} onSongSelect={onSongSelect} listClassName="song-grid" /> )}
       </div>
-
       <div className="pagination">
-        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1 || isLoading}>
-          « Eelmine
-        </button>
+        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1 || isLoading}>« Eelmine</button>
         <span>Leht {currentPage}</span>
-        <button onClick={() => handlePageChange(currentPage + 1)} disabled={songs.length < limit || isLoading}>
-          Järgmine »
-        </button>
+        <button onClick={() => handlePageChange(currentPage + 1)} disabled={songs.length < limit || isLoading}>Järgmine »</button>
       </div>
     </div>
   );

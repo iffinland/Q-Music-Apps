@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx - PÄRIB PÄRIS ANDMEID QDN-ist
+// src/pages/HomePage.jsx - PARANDATUD JA PUHASTATUD
 import React, { useState, useEffect } from 'react';
 import MusicList from '../components/MusicList';
 
@@ -10,26 +10,29 @@ function HomePage({ onSongSelect }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchSongsFromQDN = async () => {
+    // Eraldasime asünkroonse loogika, aga hoiame selle useEffecti sees
+    // See on tavaline ja korrektne muster
+    async function fetchSongs() {
+      setIsLoading(true);
+      setError(null);
+
       if (typeof qortalRequest === 'undefined') {
-        setError("Qortali API pole kättesaadav.");
+        setError("Qortali API-t ei leitud.");
         setIsLoading(false);
         return;
       }
+
       try {
-        const requestObject = {
+        const results = await qortalRequest({
           action: "SEARCH_QDN_RESOURCES",
           service: "AUDIO",
-          // identifier: "earbump", // Otsime kõiki, mitte ainult earbump
-          // prefix: true,
           includeMetadata: true,
           limit: 25,
           reverse: true,
-          excludeBlocked: true,
-        };
-        const results = await qortalRequest(requestObject);
+          excludeBlocked: true
+        });
 
-        if (Array.isArray(results) && results.length > 0) {
+        if (Array.isArray(results)) {
           const formatted = results.map(item => {
             let finalArtist = item.name || "Tundmatu Esitaja";
             if (item.metadata?.description?.includes('artist=')) {
@@ -40,38 +43,49 @@ function HomePage({ onSongSelect }) {
               id: item.identifier,
               title: item.metadata?.title || item.identifier,
               artist: finalArtist,
-              qdnData: { name: item.name, service: item.service, identifier: item.identifier }
+              qdnData: { name: item.name, service: item.service, identifier: item.identifier },
+              artworkUrl: `/thumbnail/${item.name}/${item.identifier}`
             };
           });
-          setLatestSongs(formatted);
+          setLatestSongs(formatted); // Nüüd on see korrektne
         } else {
           setLatestSongs([]);
         }
+
       } catch (e) {
         setError(`Viga andmete laadimisel: ${e.message}`);
       } finally {
         setIsLoading(false);
       }
-    };
-    fetchSongsFromQDN();
-  }, []);
+    }
 
-  const renderContent = () => {
-    if (isLoading) return <p>Laen lugusid QDN-ist...</p>;
-    if (error) return <p style={{ color: 'red' }}>{error}</p>;
-    if (latestSongs.length === 0) return <p>Ei leidnud ühtegi lugu.</p>;
-    return <MusicList songsData={latestSongs} onSongSelect={onSongSelect} listClassName="horizontal-music-list" />;
-  };
+    fetchSongs();
+  }, []); // useEffecti sõltuvuste massiiv on tühi, see jookseb ainult korra
+
+  const mockPlaylists = [
+    { id: 'pl1', name: 'Suve Hitis', songCount: 12 },
+    // ...
+  ];
 
   return (
     <div className="homepage">
       <section className="horizontal-scroll-section">
-        <h2>Viimati Lisatud</h2>
-        {renderContent()}
+        <h2>Populaarsed Lood (QDN)</h2>
+        {isLoading && <p>Laen lugusid...</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {!isLoading && !error && latestSongs.length === 0 && <p>Lugusid ei leitud.</p>}
+        {!isLoading && !error && latestSongs.length > 0 && (
+          <MusicList
+            songsData={latestSongs}
+            onSongSelect={onSongSelect}
+            listClassName="horizontal-music-list"
+          />
+        )}
       </section>
+      
       <section className="horizontal-scroll-section">
         <h2>Populaarsed Playlistid</h2>
-        <p>(Playlistide funktsionaalsus on tulemas...)</p>
+        {/* ... playlistide osa ... */}
       </section>
     </div>
   );

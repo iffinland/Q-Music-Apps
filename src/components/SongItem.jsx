@@ -1,24 +1,29 @@
 // src/components/SongItem.jsx
 import React from 'react';
 
-// Võta vastu onSelect prop
+// Loome vaike-pildi komponendi, mida kasutada, kui päris pilti pole
+const DefaultArtwork = () => (
+  <div className="default-artwork">
+    <svg width="40" height="40" viewBox="0 0 24 24"><path fill="#888" d="M12,3V13.55C11.41,13.21 10.73,13 10,13C7.79,13 6,14.79 6,17C6,19.21 7.79,21 10,21C12.21,21 14,19.21 14,17V7H18V3H12Z" /></svg>
+  </div>
+);
+
 function SongItem({ song, onSelect }) {
-  if (!song) {
-    return null;
-  }
+  if (!song) return null;
 
   return (
-    // Lisame onClick sündmuse, mis kutsub välja onSelect funktsiooni
-    <div
-      className="song-item"
-      style={{ border: '1px solid #eee', margin: '10px', padding: '10px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-      onClick={onSelect} // Kutsu onSelect funktsiooni, kui laulul klikitakse
-    >
-      <img src={song.artworkUrl} alt={song.title} style={{ width: '50px', height: '50px', marginRight: '10px' }} />
-      <div>
-        <h3>{song.title}</h3>
-        <p>{song.artist} - {song.album}</p>
-        <p>Kestus: {song.duration}</p>
+    <div className="song-item" onClick={() => onSelect(song)}>
+      <div className="song-item-artwork">
+        {/* Kuvame päris pildi, kui see on olemas, muidu vaike-pildi */}
+        <img src={song.artworkUrl} alt={song.title} 
+             onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+             onLoad={(e) => { e.currentTarget.style.display = 'block'; e.currentTarget.nextSibling.style.display = 'none'; }}
+        />
+        <DefaultArtwork />
+      </div>
+      <div className="song-item-info">
+        <h4>{song.title}</h4>
+        <p>{song.artist}</p>
       </div>
     </div>
   );

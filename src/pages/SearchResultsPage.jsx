@@ -44,21 +44,23 @@ function SearchResultsPage({ onSongSelect = () => {} }) {
           const searchResults = await qortalRequest(requestObject);
           console.log("Otsingu API vastus:", searchResults);
 
-          if (Array.isArray(searchResults) && searchResults.length > 0) {
-            const formattedResults = searchResults.map(item => {
-              let finalArtist = item.name || "Tundmatu Esitaja";
-              if (item.metadata?.description?.includes('artist=')) {
-                const artistMatch = item.metadata.description.match(/artist=([^;]+)/);
-                if (artistMatch?.[1]) finalArtist = artistMatch[1].trim();
-              }
-              return {
-                id: item.identifier,
-                title: item.metadata?.title || item.identifier,
-                artist: finalArtist,
-                qdnData: { name: item.name, service: item.service, identifier: item.identifier }
-              };
-            });
-            setResults(formattedResults);
+if (Array.isArray(results) && results.length > 0) {
+  const formatted = results.map(item => {
+    let finalArtist = item.name || "Tundmatu Esitaja";
+    // ... (sinu olemasolev artisti parsimise loogika) ...
+
+    return {
+      id: item.identifier,
+      title: item.metadata?.title || item.identifier,
+      artist: finalArtist,
+      qdnData: { name: item.name, service: item.service, identifier: item.identifier },
+      // **** UUS OSA: Loome pildi URL-i ****
+      artworkUrl: `/thumbnail/${item.name}/${item.identifier}`
+      // See on suhteline URL. Qortali UI keskkond peaks selle muutma
+      // täisaadressiks (http://localhost:12391/thumbnail/...).
+    };
+  });
+  setLatestSongs(formatted);
           } else {
             setResults([]); // Tulemusi ei leitud
           }

@@ -563,3 +563,87 @@ body {
   padding-top: 2rem;
   border-top: 1px solid #333;
 }
+
+/*========================================================
+Laulukaardi pildi konteiner 
+###########################################################*/
+.song-item-artwork {
+  width: 100%;
+  padding-bottom: 100%; /* See teeb konteineri ruudukujuliseks (1:1 suhtega) */
+  position: relative;
+  margin-bottom: 0.75rem;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #333;
+}
+.song-item-artwork img,
+.song-item-artwork .default-artwork {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Tagab, et pilt täidab ruumi korrektselt */
+}
+
+/* Vaike-pildi stiil */
+.default-artwork {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #282828;
+}
+
+/* Laulukaardi info paigutus */
+.song-item-info {
+  text-align: left;
+}
+.song-item-info h4, .song-item-info p {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Lisab "..." kui tekst ei mahu */
+}
+.song-item-info p {
+  font-size: 0.9em;
+  color: #b3b3b3;
+}
+
+/* Playeri pildi stiilid */
+.player-song-info {
+  min-width: 180px; /* Anname miinimumlaiuse */
+}
+
+.player-artwork {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #333;
+}
+.player-artwork img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.default-artwork-player {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #282828;
+}
+
+/* .player-song-details {
+  See on uus, et tekst oleks pildi kõrval korrektselt 
+}
+*/
+.player-song-info {
+  /* Muudame olemasolevat reeglit */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 180px; /* Anname miinimumlaiuse */
+}
