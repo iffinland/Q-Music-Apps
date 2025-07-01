@@ -20,18 +20,17 @@ function AddMusicPage({ currentUser }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!selectedFile || !currentUser?.name) {
-      alert('Faili valimine ja sisselogimine on kohustuslikud.');
+      alert('You must be logged in to publish a file..');
       return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortali API-t ei leitud.");
+      alert("Qortal API not found.");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Funktsioon faili konverteerimiseks Base64-ks
       const toBase64 = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -39,36 +38,32 @@ function AddMusicPage({ currentUser }) {
         reader.onerror = (error) => reject(error);
       });
       
-      console.log("Konverdin faili Base64-ks...");
+      console.log("Converting a file to Base64...");
       const fileAsBase64 = await toBase64(selectedFile);
-      console.log("Konvertimine õnnestus.");
+      console.log("Conversion successful.");
 
-      // **** OLULINE MUUDATUS: Koostame päringu, mis sisaldab ainult Base64 andmeid ****
       const requestObject = {
         action: "PUBLISH_QDN_RESOURCE",
-        name: currentUser.name, // Kohustuslik väli
+        name: currentUser.name,
         service: "AUDIO",
-        // Kasutame 'data64' võtit, mis on levinud Base64 andmete jaoks
         data64: fileAsBase64, 
-        // Me ei saada 'file', 'filename', 'title', 'description', 'identifier'
-        // Laseme Qortalil ise otsustada, mida teha minimaalse infoga.
       };
 
-      console.log('Saadan Qortalisse (minimaalne + Base64) päringu:', requestObject);
+      console.log('Sending a request to Qortal (minimal + Base64):', requestObject);
       const result = await qortalRequest(requestObject);
-      console.log("Qortal API tagastas (result):", result);
+      console.log("Qortal API returned (result):", result);
 
       if (result === true) {
-         alert('Lugu on edukalt avaldatud Qortalisse!');
+         alert('The new song has been successfully published to Qortal!');
          navigate('/');
       } else {
-         throw new Error(`API ei tagastanud edukat vastust (true), vaid: ${JSON.stringify(result)}`);
+         throw new Error(`The API did not return a successful response (true), but: ${JSON.stringify(result)}`);
       }
 
     } catch (error) {
-      console.error('Avaldamise viga:', error);
+      console.error('Publishing error:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Avaldamine ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
+      alert(`Publishing failed. API returned an error.:\n\n${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -77,24 +72,24 @@ function AddMusicPage({ currentUser }) {
   return (
     // Vorm jääb samaks
     <div className="add-music-page">
-      <h2>Lae Üles Uus Lugu</h2>
-      <p>Avaldaja: <strong>{currentUser ? currentUser.name : 'Pole sisse logitud'}</strong></p>
+      <h2>Upload a new song</h2>
+      <p>Publisher: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="title">Loo pealkiri (hetkel ei kasutata päringus)</label>
+          <label htmlFor="title">Song title</label>
           <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isUploading} />
         </div>
         <div className="form-group">
-          <label htmlFor="artist">Esitaja (hetkel ei kasutata päringus)</label>
+          <label htmlFor="artist">Artist / Band</label>
           <input type="text" id="artist" value={artist} onChange={(e) => setArtist(e.target.value)} disabled={isUploading} />
         </div>
         <div className="form-group">
-          <label htmlFor="audioFile">Vali audiofail (nt .mp3)</label>
+          <label htmlFor="audioFile">Choose audio file</label>
           <input type="file" id="audioFile" onChange={handleFileChange} accept="audio/*" disabled={isUploading} required />
-          {selectedFile && <p>Valitud fail: {selectedFile.name}</p>}
+          {selectedFile && <p>Selected file: {selectedFile.name}</p>}
         </div>
         <button type="submit" disabled={!currentUser || isUploading}>
-          {isUploading ? 'Avaldan...' : 'Avalda Qortalisse'}
+          {isUploading ? 'Uue loo avaldamine QDN-is...' : 'Publish to Qortal'}
         </button>
       </form>
     </div>

@@ -22,7 +22,7 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
       setError(null);
       
       if (typeof qortalRequest === 'undefined') {
-        setError("Qortali API pole kättesaadav.");
+        setError("Qortal API is unavailable.");
         setIsLoading(false);
         return;
       }
@@ -50,7 +50,7 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
         if (Array.isArray(results)) {
           setTotalSongs(results.length)
           const formatted = results.map(item => {
-            let finalArtist = item.name || "Tundmatu Esitaja";
+            let finalArtist = item.name || "Unknown Artist";
             if (item.metadata?.description?.includes('artist=')) {
               const artistMatch = item.metadata.description.match(/artist=([^;]+)/);
               if (artistMatch?.[1]) finalArtist = artistMatch[1].trim();
@@ -68,7 +68,7 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
           setSongs([]);
         }
       } catch (e) {
-        setError(`Viga andmete laadimisel: ${e.message}`);
+        setError(`Error loading data: ${e.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -88,20 +88,20 @@ function BrowseSongsPage({ onSongSelect = () => {} }) {
   
   return (
     <div className="page-container browse-page">
-      <h2>Sirvi Kõiki Lugusid</h2>
+      <h2>Browse all songs</h2>
       <div className="alphabet-filter">
         {alphabet.map(letter => ( <button key={letter} className={currentLetter === letter ? 'active' : ''} onClick={() => handleLetterChange(letter)} disabled={isLoading} >{letter}</button> ))}
       </div>
       <div className="browse-results">
-        {isLoading && <p>Laen lugusid...</p>}
+        {isLoading && <p>Loading songs...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {!isLoading && !error && songs.length === 0 && <p>Selle valikuga laule ei leitud.</p>}
+        {!isLoading && !error && songs.length === 0 && <p>No songs found with this criteria, try something else.</p>}
         {!isLoading && !error && songs.length > 0 && ( <MusicList songsData={songs} onSongSelect={onSongSelect} listClassName="song-grid" /> )}
       </div>
       <div className="pagination">
-        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1 || isLoading}>« Eelmine</button>
-        <span>Leht {currentPage}</span>
-        <button onClick={() => handlePageChange(currentPage + 1)} disabled={songs.length < limit || isLoading}>Järgmine »</button>
+        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1 || isLoading}>« Previous</button>
+        <span> Page {currentPage} </span>
+        <button onClick={() => handlePageChange(currentPage + 1)} disabled={songs.length < limit || isLoading}>Next »</button>
       </div>
     </div>
   );

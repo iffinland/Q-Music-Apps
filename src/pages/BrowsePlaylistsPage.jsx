@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 // Mock-andmed on siin, et vältida probleeme
 const allMockPlaylists = Array.from({ length: 40 }, (_, i) => ({
   id: `playlist-${i + 1}`,
-  name: `Parimad Lood Vol. ${i + 1}`,
-  owner: 'Q-Music Fänn',
+  name: `Best songs Vol. ${i + 1}`,
+  owner: 'Q-Music Fan',
   songCount: Math.floor(Math.random() * 40) + 10,
 }));
 
@@ -23,18 +23,18 @@ function BrowsePlaylistsPage() {
 
   return (
     <div className="page-container browse-page">
-      <h2>Sirvi Playliste</h2>
-      <p>Avasta kogukonna loodud playliste.</p>
+      <h2>Browse all playlists</h2>
+      <p>Discover community-created playlists.</p>
       
       {isLoading ? (
-        <p>Laen...</p>
+        <p>Loading...</p>
       ) : (
         <div className="playlist-grid">
           {playlists.map(playlist => (
             <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="playlist-card">
               <h4>{playlist.name}</h4>
-              <p>{playlist.songCount} laulu</p>
-              <span className="playlist-owner">Looja: {playlist.owner}</span>
+              <p>{playlist.songCount} songs</p>
+              <span className="playlist-owner">Created by: {playlist.owner}</span>
             </Link>
           ))}
         </div>
