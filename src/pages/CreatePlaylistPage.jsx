@@ -1,4 +1,4 @@
-// src/pages/CreatePlaylistPage.jsx - TÄPSELT NAGU EAR-BUMP TEHING
+// src/pages/CreatePlaylistPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,74 +13,69 @@ function CreatePlaylistPage({ currentUser }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!playlistName || !currentUser?.name) {
-      alert('Playlisti nimi ja sisselogimine on kohustuslikud.'); return;
+      alert('You must be logged in to create a playlist..'); return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortali API-t ei leitud."); return;
+      alert("Qortal API not found."); return;
     }
 
     setIsCreating(true);
 
     try {
-      // 1. Koostame JSON objekti ja muudame selle stringiks
       const playlistDataObject = { title: playlistName, description, songs: [] };
       const playlistDataAsString = JSON.stringify(playlistDataObject);
 
-      // 2. Loome unikaalse identifikaatori ja failinime
       const safeName = playlistName.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase().slice(0, 20);
       const identifier = `qmusic_playlist_${safeName}_${Date.now()}`;
-      const filename = `${identifier}.json`; // Loome unikaalse .json failinime
+      const filename = `${identifier}.json`; 
 
-      // 3. Pakime JSON-stringi File objekti sisse, nagu EAR-Bump tehing näitab
       const playlistFile = new File([playlistDataAsString], filename, {
         type: "application/json;charset=utf-8",
       });
 
-      // 4. Koostame päringu objekti, mis vastab kõigele, mida oleme õppinud
       const requestObject = {
         action: "PUBLISH_QDN_RESOURCE",
-        name: currentUser.name,       // Teame, et see on kohustuslik
-        service: "PLAYLIST",          // Teame, et see on õige
-        identifier: identifier,       // Loome unikaalse identifikaatori
-        file: playlistFile,           // Edastame andmed .json failina
+        name: currentUser.name,
+        service: "PLAYLIST",
+        identifier: identifier,
+        file: playlistFile,
       };
 
-      console.log('Saadan Qortalisse (uusim katse):', requestObject);
+      console.log('Sending Qortal (latest attempt):', requestObject);
       const result = await qortalRequest(requestObject);
-      console.log("Qortal API tagastas:", result);
+      console.log("Qortal API returned:", result);
 
       if (result === true) {
-        alert(`Playlist "${playlistName}" on edukalt loodud!`);
+        alert(`Playlist "${playlistName}" has been successfully created!`);
         navigate('/playlists');
       } else {
-        throw new Error(`API ei tagastanud edukat vastust (true), vaid: ${JSON.stringify(result)}`);
+        throw new Error(`The API did not return a successful response (true), but: ${JSON.stringify(result)}`);
       }
 
     } catch (error) {
-      console.error('Playlisti loomise viga:', error);
+      console.error('Playlist creation error:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Playlisti loomise ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
+      alert(`Playlist creation failed. API returned an error.:\n\n${errorMessage}`);
     } finally {
       setIsCreating(false);
     }
   };
 
   return (
-    // Vormi JSX jääb samaks
     <div className="form-page-container">
-      <h2>Loo Uus Playlist</h2>
-      <p>Looja: <strong>{currentUser ? currentUser.name : 'Sisselogimata'}</strong></p>
+      <h2>Create a New Playlist</h2>
+      <p>Created by: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="playlistName">Playlisti nimi</label>
           <input type="text" id="playlistName" value={playlistName} onChange={(e) => setPlaylistName(e.target.value)} disabled={isCreating} required />
         </div>
         <div className="form-group">
-          <label htmlFor="description">Kirjeldus (valikuline)</label>
+          <label htmlFor="description">Description</label>
           <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={isCreating} />
         </div>
         <button type="submit" disabled={!currentUser || isCreating}>
-          {isCreating ? 'Loon...' : 'Loo Playlist'}
+          {isCreating ? 'Creating a playlist...' : 'Create playlist'}
         </button>
       </form>
     </div>

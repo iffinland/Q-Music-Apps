@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx - LÕPLIK PARANDUS
+// src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import MusicList from '../components/MusicList';
 /* global qortalRequest */
@@ -13,7 +13,7 @@ function HomePage({ onSongSelect }) {
             setIsLoading(true);
             setError(null);
             if (typeof qortalRequest === 'undefined') {
-                setError("Qortali API-t ei leitud. Palun kasuta Qortali keskkonnas.");
+                setError("Qortal API not found. Please use Qortal in the environment..");
                 setIsLoading(false);
                 return;
             }
@@ -44,10 +44,10 @@ function HomePage({ onSongSelect }) {
                                 artworkDataUrl = `data:image/jpeg;base64,${thumbnailData}`;
                             }
                         } catch (thumbError) {
-                            // Kui thumbnaili pärimine ebaõnnestub, lihtsalt jätkame ilma selleta
+                            
                         }
                         
-                        let finalArtist = item.name || "Tundmatu Esitaja";
+                        let finalArtist = item.name || "Unknown Artist";
                         if (item.metadata?.description?.includes('artist=')) {
                             const artistMatch = item.metadata.description.match(/artist=([^;]+)/);
                             if (artistMatch?.[1]) {
@@ -67,8 +67,8 @@ function HomePage({ onSongSelect }) {
                     setLatestSongs(formattedSongs);
                 }
             } catch (e) {
-                console.error("Viga laulude nimekirja pärimisel:", e);
-                setError(`Viga andmete laadimisel: ${e.message}`);
+                console.error("Error retrieving song list:", e);
+                setError(`Error loading data: ${e.message}`);
             } finally {
                 setIsLoading(false);
             }
@@ -77,28 +77,27 @@ function HomePage({ onSongSelect }) {
     }, []);
 
     const renderSongsSection = () => {
-        if (isLoading) return <p>Laen lugusid QDN-ist...</p>;
+        if (isLoading) return <p>Loading songs from QDN...</p>;
         if (error) return <p style={{ color: 'red' }}>{error}</p>;
-        if (latestSongs.length === 0) return <p>Lugusid ei leitud.</p>;
+        if (latestSongs.length === 0) return <p>No songs found.</p>;
         return ( <MusicList songsData={latestSongs} onSongSelect={onSongSelect} listClassName="horizontal-music-list" /> );
     };
 
-    const mockPlaylists = [ { id: 'pl1', name: 'Suve Hitis', songCount: 12 }, { id: 'pl2', name: 'Treni Muusika', songCount: 25 }, { id: 'pl3', name: 'Rahulikud Õhtud', songCount: 30 }, ];
+    const mockPlaylists = [ { id: 'pl1', name: 'Summer Hitis', songCount: 12 }, { id: 'pl2', name: 'Training Music', songCount: 25 }, { id: 'pl3', name: 'Peaceful Evenings', songCount: 30 }, ];
 
-    // **** SIIN ON PARANDUS ****
     return (
         <div className="homepage">
             <section className="horizontal-scroll-section">
-                <h2>Populaarsed Lood</h2>
+                <h2>Latest 25 songs released</h2>
                 {renderSongsSection()}
             </section>
             <section className="horizontal-scroll-section">
-                <h2>Populaarsed Playlistid</h2>
+                <h2>The latest 25 playlists created</h2>
                 <div className="horizontal-playlist-grid">
                     {mockPlaylists.map(playlist => (
                         <div key={playlist.id} className="playlist-card">
                             <h4>{playlist.name}</h4>
-                            <p>{playlist.songCount} laulu</p>
+                            <p>{playlist.songCount} songs</p>
                         </div>
                     ))}
                 </div>
