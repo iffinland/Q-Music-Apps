@@ -33,23 +33,24 @@ function ProfilePage() {
               />
               */}
               {/* Võiks lisada ka Not Found lehe (404) */}
-              <Route path="*" element={<div><h2>404 Lehte ei leitud</h2><Link to="/">Mine avalehele</Link></div>} />
+              <Route path="*" element={<div><h2>404 Page not found</h2><Link to="/">Go back homepage</Link></div>} />
             </Routes>
           </main>
 
           {/* PAREM KÜLGRIBA (Sidebar) */}
           {isLoggedIn && currentUser && (
             <aside className="sidebar" style={{ width: '250px', padding: '1rem', borderLeft: '1px solid #ccc', backgroundColor: '#f9f9f9' }}>
-              <h3>Tere, {currentUser.name}!</h3>
+              <h6>Logged in with name</h6>
+              {currentUser.name}
               <nav>
                 <ul>
-                  <li><Link to="/add-music">Lisa Muusikat</Link></li>
-                  <li><Link to="/create-playlist">Loo Playlist</Link></li>
+                  <li><Link to="/add-music">Add NEW music</Link></li>
+                  <li><Link to="/create-playlist">Create NEW playlist</Link></li>
                   {/* <li><Link to="/profile">Minu Profiil</Link></li> */}
                   {/* ... muud lingid ... */}
                 </ul>
               </nav>
-              <p>Muu info/statistika...</p>
+              <p>Other information...</p>
             </aside>
           )}
         </div>

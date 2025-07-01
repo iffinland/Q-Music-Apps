@@ -52,7 +52,7 @@ function App() {
 
   const handleLogin = async () => {
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortali API-t ei leitud."); return;
+      alert("Qortal API not found."); return;
     }
     try {
       const accountData = await qortalRequest({ action: "GET_USER_ACCOUNT" });
@@ -63,15 +63,15 @@ function App() {
         setIsLoggedIn(true);
         setCurrentUser(userToSet);
         alert(`Tere, ${userToSet.name}!`);
-      } else { throw new Error("Kasutaja andmeid ei saadud."); }
-    } catch (error) { alert(`Sisselogimine ebaõnnestus: ${error.message}`); }
+      } else { throw new Error("User data not received."); }
+    } catch (error) { alert(`Login failed: ${error.message}`); }
   };
 
   const handleNavigateToAction = async (targetPath) => {
     if (isLoggedIn) {
       navigate(targetPath);
     } else {
-      alert("Selleks pead olema sisse logitud.");
+      alert("You must be logged in to do this..");
       await handleLogin();
     }
   };

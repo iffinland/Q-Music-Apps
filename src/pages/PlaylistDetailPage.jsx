@@ -8,12 +8,12 @@ import { songs as allSongs } from '../data/mockSongs';
 
 // Abifunktsioon, mis "leiab" playlisti info ID järgi
 const findPlaylistDetails = (playlistId) => {
-  console.log(`Otsin playlisti detailinfot ID-ga: ${playlistId}`);
+  console.log(`Looking for playlist details by ID: ${playlistId}`);
   return {
     id: playlistId,
-    name: `Parimad Lood Vol. ${playlistId.replace('playlist-', '')}`,
-    description: "See on suurepärane kollektsioon parimatest lugudest.",
-    owner: "Q-Music Fänn",
+    name: `Best Songs Vol.. ${playlistId.replace('playlist-', '')}`,
+    description: "This is a great collection of the best stories.",
+    owner: "Q-Music Fan",
     songs: allSongs.slice(0, 10).map(song => ({...song, id: `${song.id}-${playlistId}`})),
   };
 };
@@ -33,11 +33,11 @@ function PlaylistDetailPage({ onSongSelect = () => {} }) {
   }, [playlistId]);
 
   if (isLoading) {
-    return <div className="page-container"><p>Laen playlisti infot...</p></div>;
+    return <div className="page-container"><p>Loading playlist info...</p></div>;
   }
 
   if (!playlist) {
-    return <div className="page-container"><h2>Playlisti ei leitud</h2></div>;
+    return <div className="page-container"><h2>Playlist not found</h2></div>;
   }
 
   return (
@@ -47,7 +47,7 @@ function PlaylistDetailPage({ onSongSelect = () => {} }) {
           <p>Playlist</p>
           <h1>{playlist.name}</h1>
           <p>{playlist.description}</p>
-          <span>Looja: {playlist.owner} • {playlist.songs.length} laulu</span>
+          <span>Created by: {playlist.owner} • {playlist.songs.length} songs</span>
         </div>
       </div>
       <div className="playlist-songs">

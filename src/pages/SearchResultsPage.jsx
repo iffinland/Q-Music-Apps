@@ -30,7 +30,7 @@ function SearchResultsPage({ onSongSelect = () => {} }) {
         }
 
         try {
-          console.log(`Otsin QDN-ist päringuga: "${query}"`);
+          console.log(`Search QDN: "${query}"`);
 
           const requestObject = {
             action: "SEARCH_QDN_RESOURCES",
@@ -42,11 +42,11 @@ function SearchResultsPage({ onSongSelect = () => {} }) {
           };
 
           const searchResults = await qortalRequest(requestObject);
-          console.log("Otsingu API vastus:", searchResults);
+          console.log("Search API response:", searchResults);
 
 if (Array.isArray(results) && results.length > 0) {
   const formatted = results.map(item => {
-    let finalArtist = item.name || "Tundmatu Esitaja";
+    let finalArtist = item.name || "Unknown Artist";
     // ... (sinu olemasolev artisti parsimise loogika) ...
 
     return {
@@ -65,8 +65,8 @@ if (Array.isArray(results) && results.length > 0) {
             setResults([]); // Tulemusi ei leitud
           }
         } catch (e) {
-          console.error("Otsingu viga:", e);
-          setError(`Otsing ebaõnnestus: ${e.message}`);
+          console.error("Search error:", e);
+          setError(`Search failed: ${e.message}`);
         } finally {
           setIsLoading(false);
         }
@@ -80,11 +80,11 @@ if (Array.isArray(results) && results.length > 0) {
     <div className="page-container search-results-page">
       {query ? (
         <>
-          <h2>Otsingutulemused päringule: "{query}"</h2>
+          <h2>Search results for the query: "{query}"</h2>
           <div className="browse-results">
-            {isLoading && <p>Otsin...</p>}
+            {isLoading && <p>Searching...</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            {!isLoading && !error && results.length === 0 && <p>Selle päringuga ei leitud ühtegi lugu.</p>}
+            {!isLoading && !error && results.length === 0 && <p>No songs were found with this query..</p>}
             {!isLoading && !error && results.length > 0 && (
               // Kasutame sama song-grid stiili, mis sirvimise lehel
               <MusicList songsData={results} onSongSelect={onSongSelect} listClassName="song-grid" />
@@ -92,7 +92,7 @@ if (Array.isArray(results) && results.length > 0) {
           </div>
         </>
       ) : (
-        <h2>Palun sisesta otsingusõna headeris olevasse kasti.</h2>
+        <h2>Please enter your search term in the search box..</h2>
       )}
     </div>
   );

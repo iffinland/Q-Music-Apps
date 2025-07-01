@@ -42,11 +42,11 @@ function SongDetailPage({ onSongSelect = () => {} }) {
   }, [songId]);
 
   if (isLoading) {
-    return <div className="page-container"><p>Laen laulu infot...</p></div>;
+    return <div className="page-container"><p>Loading song info...</p></div>;
   }
 
   if (!song) {
-    return <div className="page-container"><h2>Laulu ei leitud</h2></div>;
+    return <div className="page-container"><h2>Song not found</h2></div>;
   }
 
   return (
@@ -57,15 +57,15 @@ function SongDetailPage({ onSongSelect = () => {} }) {
           <img src={`https://via.placeholder.com/150/1DB954/FFFFFF?text=${song.title.substring(0,1)}`} alt={`${song.title} artwork`} />
         </div>
         <div className="song-info">
-          <p>Lugu</p>
+          <p>Song</p>
           <h1>{song.title}</h1>
-          <p>Esitaja: <strong>{song.artist}</strong> • Album: {song.album} ({song.year})</p>
-          <button className="play-button" onClick={() => onSongSelect(song)}>Mängi</button>
+          <p>Artist: <strong>{song.artist}</strong> • Album: {song.album} ({song.year})</p>
+          <button className="play-button" onClick={() => onSongSelect(song)}>PLAY</button>
         </div>
       </div>
       <div className="song-details-body">
-        <p>Žanr: {song.genre}</p>
-        <p>Avaldaja: {song.publishedBy}</p>
+        <p>Genr: {song.genre}</p>
+        <p>Publisher: {song.publishedBy}</p>
         {/* Siia võiks tulevikus lisada laulusõnad vms */}
       </div>
     </div>
