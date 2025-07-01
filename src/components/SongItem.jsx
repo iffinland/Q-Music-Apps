@@ -1,7 +1,6 @@
 // src/components/SongItem.jsx
 import React from 'react';
 
-// Loome vaike-pildi komponendi, mida kasutada, kui päris pilti pole
 const DefaultArtwork = () => (
   <div className="default-artwork">
     <svg width="40" height="40" viewBox="0 0 24 24"><path fill="#888" d="M12,3V13.55C11.41,13.21 10.73,13 10,13C7.79,13 6,14.79 6,17C6,19.21 7.79,21 10,21C12.21,21 14,19.21 14,17V7H18V3H12Z" /></svg>
@@ -14,7 +13,7 @@ function SongItem({ song, onSelect }) {
   return (
     <div className="song-item" onClick={() => onSelect(song)}>
       <div className="song-item-artwork">
-        {/* Kuvame päris pildi, kui see on olemas, muidu vaike-pildi */}
+        {/* We display the real image if it exists, otherwise the default image */}
         <img src={song.artworkUrl} alt={song.title} 
              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
              onLoad={(e) => { e.currentTarget.style.display = 'block'; e.currentTarget.nextSibling.style.display = 'none'; }}

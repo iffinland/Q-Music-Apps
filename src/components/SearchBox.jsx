@@ -1,15 +1,14 @@
-// src/components/SearchBox.jsx - SAMM 3
+// src/components/SearchBox.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Impordi useNavigate
 
 function SearchBox({ placeholderText = "Otsi..." }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate(); // Võta navigate funktsioon kasutusele
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (searchTerm.trim()) {
-      // Kasuta navigate funktsiooni, et suunata kasutaja otsingulehele
       navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
     }
   };

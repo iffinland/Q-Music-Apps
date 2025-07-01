@@ -1,4 +1,4 @@
-// src/components/Player.jsx - LÕPLIK KORREKTNE VERSIOON
+// src/components/Player.jsx
 import React, { useState, useEffect, useRef } from 'react';
 /* global qortalRequest */
 

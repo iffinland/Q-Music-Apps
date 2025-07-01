@@ -1,45 +1,36 @@
-// src/components/Sidebar.jsx - NÜÜD PÄRIB ISE OMA ANDMED
+// src/components/Sidebar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// Me ei vaja enam useAuth'i, sest sisselogimise info tuleb propsidena
-// import { useAuth } from '../context/AuthContext';
 
 /* global qortalRequest */
 
-// Sidebar saab sisselogimise info endiselt propsidena App.jsx-ist
 function Sidebar({ isLoggedIn, currentUser }) {
-  // Loome oleku statistika jaoks
   const [stats, setStats] = useState({
-    songs: '...', // Alguses näitame laadimise indikaatorit
+    songs: '...', 
     playlists: '...',
     publishers: '...'
   });
 
-  // See useEffect käivitub ainult korra, kui komponent laetakse
   useEffect(() => {
     const fetchStats = async () => {
       if (typeof qortalRequest === 'undefined') {
         console.warn("Sidebar: Qortal API not available for stats.");
-        // Jätame vaikimisi väärtused, kui API-t pole
         setStats({ songs: 'N/A', playlists: 'N/A', publishers: 'N/A' });
         return;
       }
 
       try {
-        // Pärime laulude arvu
         const songStatsResponse = await qortalRequest({
           action: 'SEARCH_QDN_RESOURCES',
           service: 'AUDIO',
-          limit: 0, // Küsime ainult koguarvu
+          limit: 0, // We only ask for the total number
         });
-        // API tagastab massiivi, mille pikkus ongi koguarv
         const totalSongs = Array.isArray(songStatsResponse) ? songStatsResponse.length : 0;
 
-        // TODO: Tulevikus pärime siin ka playlistide ja avaldajate arvu
-        const totalPlaylists = 0; // Ajutine
-        const totalPublishers = 0; // Ajutine
+        // TODO: In the future, we will also request the number of playlists and publishers here.
+        const totalPlaylists = 0;
+        const totalPublishers = 0;
 
-        // Uuendame olekut päris andmetega
         setStats({
           songs: totalSongs,
           playlists: totalPlaylists,
@@ -53,7 +44,7 @@ function Sidebar({ isLoggedIn, currentUser }) {
     };
 
     fetchStats();
-  }, []); // Tühi sõltuvuste massiiv tagab, et see jookseb ainult korra
+  }, []); 
 
   return (
     <aside className="sidebar">
