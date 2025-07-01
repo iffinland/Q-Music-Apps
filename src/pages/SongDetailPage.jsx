@@ -8,7 +8,7 @@ import { songs as allSongs } from '../data/mockSongs';
 // Abifunktsioon, mis "leiab" laulu info ID järgi
 const findSongDetails = (songId) => {
   // Päris rakenduses teeksime siin qortalRequest({ action: "GET_SONG_DATA", id: songId })
-  console.log(`Otsin laulu detailinfot ID-ga: ${songId}`);
+  console.log(`Searching for song details by ID: ${songId}`);
   // Leiame laulu mock-andmetest. Eemaldame võimaliku playlisti-spetsiifilise osa ID-st.
   const cleanId = parseInt(songId.replace('song-', '').split('-')[0], 10);
   const foundSong = allSongs.find(song => song.id === cleanId);

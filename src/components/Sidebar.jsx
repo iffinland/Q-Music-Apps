@@ -50,7 +50,9 @@ function Sidebar({ isLoggedIn, currentUser }) {
     <aside className="sidebar">
       <section className="stats-section">
         <h5><b>S T A T I S T I C S</b></h5>
-        <p>Songs: {stats.songs}</p>
+        <p>ALL Songs: {stats.songs}</p>
+        <p>Q-Muisc Songs: 0</p>
+        <p>Ear-Bump Songs: {stats.songs}</p>
         <p>Playlists: {stats.playlists}</p>
         <p>Publishers: {stats.publishers}</p>
       </section>
@@ -62,7 +64,16 @@ function Sidebar({ isLoggedIn, currentUser }) {
           </div>
           <p className="user-name">{currentUser.name}</p>
         </section>
+        
       )}
+
+      <section className="stats-section">
+        <h5><b>I N F O R M A T I O N</b></h5>
+        <p>Visit our Q-Chat by name: <font color="orange"><b>Q-Music</b></font></p>
+        <p>Click and send <a href="qortal://APP/Q-Mail/to/iffi%20forest%20life"><b>Q-Mail</b></a></p>
+        <p>Suggestions, ideas, problems!?</p>
+        <p>visit Q-Music <font color="green"><b>CHAT-THREADS</b></font></p>
+      </section>
     </aside>
   );
 }

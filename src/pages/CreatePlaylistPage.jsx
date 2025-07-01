@@ -64,6 +64,7 @@ function CreatePlaylistPage({ currentUser }) {
   return (
     <div className="form-page-container">
       <h2>Create a New Playlist</h2>
+      <h4><font color="red"><b>This service is currently unavailable.</b></font></h4>
       <p>Created by: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">

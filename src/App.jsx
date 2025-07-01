@@ -46,7 +46,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
-    alert("Oled välja logitud.");
+    alert("You have been successfully logged out. Close this message..");
     navigate('/');
   };
 
@@ -58,11 +58,11 @@ function App() {
       const accountData = await qortalRequest({ action: "GET_USER_ACCOUNT" });
       if (accountData?.address) {
         const namesData = await qortalRequest({ action: 'GET_ACCOUNT_NAMES', address: accountData.address });
-        const userName = namesData?.[0]?.name || `Kasutaja ${accountData.address.substring(0, 6)}...`;
+        const userName = namesData?.[0]?.name || `USER ${accountData.address.substring(0, 6)}...`;
         const userToSet = { name: userName, address: accountData.address, publicKey: accountData.publicKey };
         setIsLoggedIn(true);
         setCurrentUser(userToSet);
-        alert(`Tere, ${userToSet.name}!`);
+        alert(`Nice to see you again, ${userToSet.name}! Enjoy and share music with the community!`);
       } else { throw new Error("User data not received."); }
     } catch (error) { alert(`Login failed: ${error.message}`); }
   };

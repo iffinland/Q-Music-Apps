@@ -73,6 +73,7 @@ function AddMusicPage({ currentUser }) {
     // Vorm jääb samaks
     <div className="add-music-page">
       <h2>Upload a new song</h2>
+      <h4><font color="red"><b>This service is currently unavailable.</b></font></h4>
       <p>Publisher: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
