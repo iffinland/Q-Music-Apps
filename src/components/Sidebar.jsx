@@ -58,7 +58,7 @@ function Sidebar({ isLoggedIn, currentUser }) {
   return (
     <aside className="sidebar">
       <section className="stats-section">
-        <h4>Statistika</h4>
+        <h5><b>S T A T I S T I C S</b></h5>
         <p>Songs: {stats.songs}</p>
         <p>Playlists: {stats.playlists}</p>
         <p>Publishers: {stats.publishers}</p>

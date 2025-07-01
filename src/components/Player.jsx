@@ -78,7 +78,7 @@ function Player({ currentSong }) {
                     )}
                 </div>
                 <div className="player-song-details">
-                    {currentSong ? ( <><strong>{currentSong.title}</strong><p>{currentSong.artist}</p></> ) : ( <p>Vali lugu kuulamiseks</p> )}
+                    {currentSong ? ( <><strong>{currentSong.title}</strong><p>{currentSong.artist}</p></> ) : ( <p>Choose a song to listen to</p> )}
                 </div>
             </div>
             <div className="player-controls">

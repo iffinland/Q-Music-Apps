@@ -9,15 +9,15 @@ function Header({ isLoggedIn, currentUser, onLoginClick, onLogoutClick, onSearch
       <div className="header-main-row">
         <h1><Link to="/" className="logo-link">Q-Music</Link></h1>
         <nav>
-          <Link to="/" className="header-link">Avaleht</Link>
-          <Link to="/songs" className="header-link">Sirvi Lugusid</Link>
-          <Link to="/playlists" className="header-link">Sirvi Playliste</Link>
+          <Link to="/" className="header-link">Homepage</Link>
+          <Link to="/songs" className="header-link">Browse songs</Link>
+          <Link to="/playlists" className="header-link">Browse playlists</Link>
         </nav>
         <nav className="header-auth-nav">
           {isLoggedIn && currentUser ? (
-            <button onClick={onLogoutClick} className="login-button">Välju ({currentUser.name})</button>
+            <button onClick={onLogoutClick} className="login-button">Log OUT({currentUser.name})</button>
           ) : (
-            <button onClick={onLoginClick} className="login-button">Logi sisse Qortaliga</button>
+            <button onClick={onLoginClick} className="login-button">Log IN</button>
           )}
         </nav>
       </div>
@@ -26,8 +26,8 @@ function Header({ isLoggedIn, currentUser, onLoginClick, onLogoutClick, onSearch
       </div>
       {isLoggedIn && (
         <div className="header-action-buttons">
-          <button onClick={() => onNavigateToAction('/add-music')} className="action-button">Lisa UUT muusikat</button>
-          <button onClick={() => onNavigateToAction('/create-playlist')} className="action-button">Lisa UUS playlist</button>
+          <button onClick={() => onNavigateToAction('/add-music')} className="action-button">Add NEW music</button>
+          <button onClick={() => onNavigateToAction('/create-playlist')} className="action-button">Create NEW playlist</button>
         </div>
       )}
     </header>

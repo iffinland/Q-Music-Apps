@@ -23,7 +23,7 @@ function SearchBox({ placeholderText = "Otsi..." }) {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <button type="submit" className="search-button">Otsi</button>
+      <button type="submit" className="search-button">SEARCH</button>
     </form>
   );
 }

@@ -6,7 +6,7 @@ import SongItem from './SongItem';
 function MusicList({ songsData = [], onSongSelect = () => {}, listClassName = "music-list" }) {
   // Muutsime kontrolli lihtsamaks, kuna vaikimisi väärtus on alati olemas
   if (songsData.length === 0) {
-    return <p>Laule ei leitud.</p>;
+    return <p>No songs found!</p>;
   }
 
   return (
