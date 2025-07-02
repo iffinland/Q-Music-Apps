@@ -39,6 +39,8 @@ function CreatePlaylistPage({ currentUser }) {
         service: "PLAYLIST",
         identifier: identifier,
         file: playlistFile,
+        appFee: 1,
+        appFeeRecipient: QTowvz1e89MP4FEFpHvEfZ4x8G3LwMpthz,
       };
 
       console.log('Sending Qortal (latest attempt):', requestObject);

@@ -47,6 +47,8 @@ function AddMusicPage({ currentUser }) {
         name: currentUser.name,
         service: "AUDIO",
         data64: fileAsBase64, 
+        appFee: 1,
+        appFeeRecipient: QTowvz1e89MP4FEFpHvEfZ4x8G3LwMpthz,
       };
 
       console.log('Sending a request to Qortal (minimal + Base64):', requestObject);
