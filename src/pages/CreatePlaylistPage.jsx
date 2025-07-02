@@ -1,4 +1,4 @@
-// src/pages/CreatePlaylistPage.jsx
+// src/pages/CreatePlaylistPage.jsx - PÕHINEB TÖÖTAVAL NÄITEL
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,51 +13,56 @@ function CreatePlaylistPage({ currentUser }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!playlistName || !currentUser?.name) {
-      alert('You must be logged in to create a playlist..'); return;
+      alert('Playlisti nimi ja sisselogimine on kohustuslikud.'); return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortal API not found."); return;
+      alert("Qortali API-t ei leitud."); return;
     }
 
     setIsCreating(true);
 
     try {
-      const playlistDataObject = { title: playlistName, description, songs: [] };
-      const playlistDataAsString = JSON.stringify(playlistDataObject);
-
-      const safeName = playlistName.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase().slice(0, 20);
-      const identifier = `qmusic_playlist_${safeName}_${Date.now()}`;
-      const filename = `${identifier}.json`; 
-
-      const playlistFile = new File([playlistDataAsString], filename, {
-        type: "application/json;charset=utf-8",
-      });
-
-      const requestObject = {
-        action: "PUBLISH_QDN_RESOURCE",
-        name: currentUser.name,
+      // 1. Koostame unikaalse identifikaatori
+      const identifier = `qmusic_playlist_${currentUser.name.replace(/ /g, '_')}_${Date.now()}`;
+      
+      // 2. Loome meta-andmete JSON-objekti
+      const metadataObject = {
+        title: playlistName,
+        description: description,
+      };
+      
+      // 3. Muudame selle stringiks
+      const metadataString = JSON.stringify(metadataObject);
+      
+      // 4. Koostame ressursid päringu jaoks (meie puhul on ainult üks)
+      // See ressurss on ise need meta-andmed. Me ei lae eraldi faili, vaid avaldame info.
+      const resource = {
+        // name: currentUser.name, // Q-Manageri koodis on name iga ressursi sees
         service: "PLAYLIST",
         identifier: identifier,
-        file: playlistFile,
-        appFee: 1,
-        appFeeRecipient: QTowvz1e89MP4FEFpHvEfZ4x8G3LwMpthz,
+        data: metadataString, // Saadame JSON-stringi otse 'data' väljal
       };
 
-      console.log('Sending Qortal (latest attempt):', requestObject);
-      const result = await qortalRequest(requestObject);
-      console.log("Qortal API returned:", result);
+      // 5. Koostame lõpliku päringu objekti
+      const requestObject = {
+        action: "PUBLISH_MULTIPLE_QDN_RESOURCE", // Kasutame lihtsamat actionit, kuna meil pole mitut faili
+        ...resource // Kopeerime kõik ressursi väljad otse siia
+      };
 
+      console.log('Saadan Qortalisse (uus meetod) playlisti loomise päringu:', requestObject);
+      const result = await qortalRequest(requestObject);
+      
       if (result === true) {
-        alert(`Playlist "${playlistName}" has been successfully created!`);
+        alert(`Playlist "${playlistName}" on edukalt loodud!`);
         navigate('/playlists');
       } else {
-        throw new Error(`The API did not return a successful response (true), but: ${JSON.stringify(result)}`);
+        throw new Error(`API ei tagastanud edukat vastust (true), vaid: ${JSON.stringify(result)}`);
       }
 
     } catch (error) {
-      console.error('Playlist creation error:', error);
+      console.error('Playlisti loomise viga:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Playlist creation failed. API returned an error.:\n\n${errorMessage}`);
+      alert(`Playlisti loomise ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
     } finally {
       setIsCreating(false);
     }
@@ -65,20 +70,19 @@ function CreatePlaylistPage({ currentUser }) {
 
   return (
     <div className="form-page-container">
-      <h2>Create a New Playlist</h2>
-      <h4><font color="red"><b>This service is currently unavailable.</b></font></h4>
-      <p>Created by: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
+      <h2>Loo Uus Playlist</h2>
+      <p>Looja: <strong>{currentUser ? currentUser.name : 'Sisselogimata'}</strong></p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="playlistName">Playlisti nimi</label>
           <input type="text" id="playlistName" value={playlistName} onChange={(e) => setPlaylistName(e.target.value)} disabled={isCreating} required />
         </div>
         <div className="form-group">
-          <label htmlFor="description">Description</label>
+          <label htmlFor="description">Kirjeldus (valikuline)</label>
           <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={isCreating} />
         </div>
         <button type="submit" disabled={!currentUser || isCreating}>
-          {isCreating ? 'Creating a playlist...' : 'Create playlist'}
+          {isCreating ? 'Loon...' : 'Loo Playlist'}
         </button>
       </form>
     </div>
