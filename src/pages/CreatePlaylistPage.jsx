@@ -70,6 +70,7 @@ function CreatePlaylistPage({ currentUser }) {
 
   return (
     <div className="form-page-container">
+      <h4><font color="orange">Service still in testing - may not work</font></h4>
       <h2>Loo Uus Playlist</h2>
       <p>Looja: <strong>{currentUser ? currentUser.name : 'Sisselogimata'}</strong></p>
       <form onSubmit={handleSubmit}>

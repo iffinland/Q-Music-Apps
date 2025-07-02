@@ -1,4 +1,4 @@
-// src/pages/AddMusicPage.jsx - MINIMAALNE PÄRING + BASE64
+// src/pages/AddMusicPage.jsx - ÜKS ACTION, ÜKS FAIL (BASE64)
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 function AddMusicPage({ currentUser }) {
   const navigate = useNavigate();
-  const [title, setTitle] = useState(''); // Hoiame alles UI jaoks
-  const [artist, setArtist] = useState(''); // Hoiame alles UI jaoks
+  const [title, setTitle] = useState('');
+  const [artist, setArtist] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -17,85 +17,83 @@ function AddMusicPage({ currentUser }) {
     }
   };
 
+  const toBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = error => reject(error);
+  });
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!selectedFile || !currentUser?.name) {
-      alert('You must be logged in to publish a file..');
-      return;
+      alert('Faili valimine ja sisselogimine on kohustuslikud.'); return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortal API not found.");
-      return;
+      alert("Qortali API-t ei leitud."); return;
     }
 
     setIsUploading(true);
 
     try {
-      const toBase64 = (file) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = (error) => reject(error);
-      });
-      
-      console.log("Converting a file to Base64...");
+      console.log("Konverdin faili base64-ks...");
       const fileAsBase64 = await toBase64(selectedFile);
-      console.log("Conversion successful.");
+      console.log("Konvertimine õnnestus.");
 
+      const identifier = `qmusic_${currentUser.name.replace(/ /g, '_')}_${Date.now()}`;
+
+      // **** OLULINE MUUDATUS: ÜKS ACTION, ÜKS RESSURSS ****
       const requestObject = {
-        action: "PUBLISH_QDN_RESOURCE",
+        action: "PUBLISH_QDN_RESOURCE", // Kasutame lihtsamat actionit
         name: currentUser.name,
         service: "AUDIO",
-        data64: fileAsBase64, 
-        appFee: 1,
-        appFeeRecipient: QTowvz1e89MP4FEFpHvEfZ4x8G3LwMpthz,
+        identifier: identifier,
+        data64: fileAsBase64, // Saadame Base64 andmed
       };
 
-      console.log('Sending a request to Qortal (minimal + Base64):', requestObject);
+      console.log('Saadan Qortalisse (lihtsustatud base64) päringu:', requestObject);
       const result = await qortalRequest(requestObject);
-      console.log("Qortal API returned (result):", result);
-
+      
       if (result === true) {
-         alert('The new song has been successfully published to Qortal!');
-         navigate('/');
+        alert(`Fail on edukalt avaldatud!`);
+        navigate('/songs');
       } else {
-         throw new Error(`The API did not return a successful response (true), but: ${JSON.stringify(result)}`);
+        throw new Error(`API ei tagastanud edukat vastust, vaid: ${JSON.stringify(result)}`);
       }
-
     } catch (error) {
-      console.error('Publishing error:', error);
+      console.error('Loo avaldamise viga:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Publishing failed. API returned an error.:\n\n${errorMessage}`);
+      alert(`Avaldamise ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    // Vorm jääb samaks
-    <div className="add-music-page">
-      <h2>Upload a new song</h2>
-      <h4><font color="red"><b>This service is currently unavailable.</b></font></h4>
-      <p>Publisher: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Song title</label>
-          <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isUploading} />
-        </div>
-        <div className="form-group">
-          <label htmlFor="artist">Artist / Band</label>
-          <input type="text" id="artist" value={artist} onChange={(e) => setArtist(e.target.value)} disabled={isUploading} />
-        </div>
-        <div className="form-group">
-          <label htmlFor="audioFile">Choose audio file</label>
-          <input type="file" id="audioFile" onChange={handleFileChange} accept="audio/*" disabled={isUploading} required />
-          {selectedFile && <p>Selected file: {selectedFile.name}</p>}
-        </div>
-        <button type="submit" disabled={!currentUser || isUploading}>
-          {isUploading ? 'Uue loo avaldamine QDN-is...' : 'Publish to Qortal'}
-        </button>
-      </form>
+    // Vormi JSX jääb samaks
+<div className="form-page-container">
+  <h4><font color="orange">Service still in testing - may not work</font></h4>
+  <h2>Lae Üles Uus Lugu</h2>
+  <p>Avaldaja: <strong>{currentUser ? currentUser.name : 'Sisselogimata'}</strong></p>
+  <form onSubmit={handleSubmit}>
+    <div className="form-group">
+      <label htmlFor="title">Loo pealkiri</label>
+      <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isUploading} required />
     </div>
+    <div className="form-group">
+      <label htmlFor="artist">Esitaja</label>
+      <input type="text" id="artist" value={artist} onChange={(e) => setArtist(e.target.value)} disabled={isUploading} required />
+    </div>
+    <div className="form-group">
+      <label htmlFor="audioFile">Vali audiofail (nt .mp3)</label>
+      <input type="file" id="audioFile" onChange={handleFileChange} accept="audio/*" disabled={isUploading} required />
+      {selectedFile && <p>Valitud fail: {selectedFile.name}</p>}
+    </div>
+    <button type="submit" disabled={!currentUser || isUploading}>
+      {isUploading ? 'Avaldan...' : 'Avalda Qortalisse'}
+    </button>
+  </form>
+</div>
   );
 }
 
