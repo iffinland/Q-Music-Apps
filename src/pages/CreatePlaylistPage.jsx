@@ -13,10 +13,10 @@ function CreatePlaylistPage({ currentUser }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!playlistName || !currentUser?.name) {
-      alert('Playlisti nimi ja sisselogimine on kohustuslikud.'); return;
+      alert('Playlist name and login are required.'); return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortali API-t ei leitud."); return;
+      alert("Qortal API not found."); return;
     }
 
     setIsCreating(true);
@@ -49,20 +49,20 @@ function CreatePlaylistPage({ currentUser }) {
         ...resource // Kopeerime kõik ressursi väljad otse siia
       };
 
-      console.log('Saadan Qortalisse (uus meetod) playlisti loomise päringu:', requestObject);
+      console.log('Sending a request to create a playlist in Qortal (new method):', requestObject);
       const result = await qortalRequest(requestObject);
       
       if (result === true) {
-        alert(`Playlist "${playlistName}" on edukalt loodud!`);
+        alert(`Playlist "${playlistName}" created successfully!`);
         navigate('/playlists');
       } else {
-        throw new Error(`API ei tagastanud edukat vastust (true), vaid: ${JSON.stringify(result)}`);
+        throw new Error(`The API did not return a successful response (true), but: ${JSON.stringify(result)}`);
       }
 
     } catch (error) {
-      console.error('Playlisti loomise viga:', error);
+      console.error('Playlist creation error:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Playlisti loomise ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
+      alert(`Playlist creation failed. API returned an error.:\n\n${errorMessage}`);
     } finally {
       setIsCreating(false);
     }
@@ -71,19 +71,19 @@ function CreatePlaylistPage({ currentUser }) {
   return (
     <div className="form-page-container">
       <h4><font color="orange">Service still in testing - may not work</font></h4>
-      <h2>Loo Uus Playlist</h2>
-      <p>Looja: <strong>{currentUser ? currentUser.name : 'Sisselogimata'}</strong></p>
+      <h2>Create a New Playlist</h2>
+      <p>Publisher: <strong>{currentUser ? currentUser.name : 'Not loged IN'}</strong></p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="playlistName">Playlisti nimi</label>
+          <label htmlFor="playlistName">Playlist name</label>
           <input type="text" id="playlistName" value={playlistName} onChange={(e) => setPlaylistName(e.target.value)} disabled={isCreating} required />
         </div>
         <div className="form-group">
-          <label htmlFor="description">Kirjeldus (valikuline)</label>
+          <label htmlFor="description">Description(optional)</label>
           <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={isCreating} />
         </div>
         <button type="submit" disabled={!currentUser || isCreating}>
-          {isCreating ? 'Loon...' : 'Loo Playlist'}
+          {isCreating ? 'Creating playlist...' : 'Create playlist'}
         </button>
       </form>
     </div>

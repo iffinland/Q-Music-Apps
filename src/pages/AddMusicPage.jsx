@@ -51,19 +51,19 @@ function AddMusicPage({ currentUser }) {
         data64: fileAsBase64, // Saadame Base64 andmed
       };
 
-      console.log('Saadan Qortalisse (lihtsustatud base64) päringu:', requestObject);
+      console.log('Sending a Qortal request (simplified base64):', requestObject);
       const result = await qortalRequest(requestObject);
       
       if (result === true) {
-        alert(`Fail on edukalt avaldatud!`);
+        alert(`File successfully published!`);
         navigate('/songs');
       } else {
-        throw new Error(`API ei tagastanud edukat vastust, vaid: ${JSON.stringify(result)}`);
+        throw new Error(`The API did not return a successful response, but: ${JSON.stringify(result)}`);
       }
     } catch (error) {
-      console.error('Loo avaldamise viga:', error);
+      console.error('Song publishing error:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Avaldamise ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
+      alert(`Publishing failed. API returned an error.:\n\n${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -73,24 +73,24 @@ function AddMusicPage({ currentUser }) {
     // Vormi JSX jääb samaks
 <div className="form-page-container">
   <h4><font color="orange">Service still in testing - may not work</font></h4>
-  <h2>Lae Üles Uus Lugu</h2>
-  <p>Avaldaja: <strong>{currentUser ? currentUser.name : 'Sisselogimata'}</strong></p>
+  <h2>Publish a new song for the commune</h2>
+  <p>Publisher: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
   <form onSubmit={handleSubmit}>
     <div className="form-group">
-      <label htmlFor="title">Loo pealkiri</label>
+      <label htmlFor="title">Song title</label>
       <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isUploading} required />
     </div>
     <div className="form-group">
-      <label htmlFor="artist">Esitaja</label>
+      <label htmlFor="artist">Artist</label>
       <input type="text" id="artist" value={artist} onChange={(e) => setArtist(e.target.value)} disabled={isUploading} required />
     </div>
     <div className="form-group">
-      <label htmlFor="audioFile">Vali audiofail (nt .mp3)</label>
+      <label htmlFor="audioFile">Choose audio file</label>
       <input type="file" id="audioFile" onChange={handleFileChange} accept="audio/*" disabled={isUploading} required />
-      {selectedFile && <p>Valitud fail: {selectedFile.name}</p>}
+      {selectedFile && <p>Selected file: {selectedFile.name}</p>}
     </div>
     <button type="submit" disabled={!currentUser || isUploading}>
-      {isUploading ? 'Avaldan...' : 'Avalda Qortalisse'}
+      {isUploading ? 'Publishing...' : 'Publish to Qortal'}
     </button>
   </form>
 </div>
