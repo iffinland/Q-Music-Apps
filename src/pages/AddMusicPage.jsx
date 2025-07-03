@@ -18,10 +18,10 @@ function AddMusicPage({ currentUser }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!title || !artist || !songFile || !currentUser?.name) {
-      alert('Pealkiri, artist ja helifail on kohustuslikud.'); return;
+      alert('Title, artist and audio file are required..'); return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortali API-t ei leitud."); return;
+      alert("Qortal API not found."); return;
     }
 
     setIsUploading(true);
@@ -46,16 +46,16 @@ function AddMusicPage({ currentUser }) {
       const result = await qortalRequest(requestObject);
       
       if (result === true) {
-        alert(`Lugu "${title}" on edukalt avaldatud!`);
+        alert(`New song "${title}" has been successfully published!`);
         navigate('/songs');
       } else {
-        throw new Error(`API ei tagastanud edukat vastust, vaid: ${JSON.stringify(result)}`);
+        throw new Error(`The API did not return a successful response, but: ${JSON.stringify(result)}`);
       }
 
     } catch (error) {
-      console.error('Loo avaldamise viga:', error);
+      console.error('Error publishing song:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Loo avaldamise ebaõnnestus. API tagastas vea:\n\n${errorMessage}`);
+      alert(`Failed to publish song. API returned an error.:\n\n${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
