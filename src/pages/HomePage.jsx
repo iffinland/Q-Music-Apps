@@ -87,7 +87,7 @@ function HomePage({ onSongSelect }) {
 
     return (
         <div className="homepage">
-            <h2><font color="orange">This app is in <b>ALPHA</b> status... Limited use features!</font></h2>
+            <h4><font color="orange">This app is in <b>ALPHA</b> status... Limited use features ! It is currently not available on mobile.</font></h4>
             <section className="horizontal-scroll-section">
                 <h2>Latest 25 songs released</h2>
                 {renderSongsSection()}

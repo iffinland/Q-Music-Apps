@@ -69,7 +69,7 @@ function Sidebar({ isLoggedIn, currentUser }) {
 
       <section className="stats-section">
         <h5><b>I N F O R M A T I O N</b></h5>
-        <p>Visit our Q-Chat by name: <font color="orange"><b>Q-Music</b></font></p>
+        <p>You can find more detailed information <i>(such as FAQ)</i> about this app by visiting the CHAT called <font color="orange"><b>Q-Music</b></font> and the THREADS section there.</p>
         <p>Click and send <a href="qortal://APP/Q-Mail/to/Q-Music"><b>Q-Mail</b></a></p>
         <p>Suggestions, ideas, problems!?</p>
         <p>visit Q-Music <font color="green"><b>CHAT-THREADS</b></font></p>
