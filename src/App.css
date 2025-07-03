@@ -435,7 +435,6 @@ body {
 }
 
 /* --- Browse Playlist --- */
-/* Lisa see App.css lõppu */
 
 .playlist-grid {
   display: grid;
@@ -497,6 +496,28 @@ body {
 .playlist-detail-page .playlist-info span {
   font-size: 0.9em;
   font-weight: bold;
+}
+
+/* ============================================================
+==== Frontpage playlist styles 
+===============================================================*/
+.playlist-card-info {
+  text-align: left;
+  flex-grow: 1; /* Tagab, et infoosa võtab vaba ruumi kaardil */
+  padding-top: 0.5rem;
+}
+
+.playlist-card-description {
+  font-size: 0.85em;
+  color: #b3b3b3;
+  /* Järgnevad 3 rida teevad kärpimise maagia */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Mitu rida kuvatakse */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.25rem;
 }
 
 /* See muudab MusicListi vertikaalseks nimekirjaks sellel lehel */
