@@ -1,8 +1,15 @@
-// src/pages/BrowsePlaylistsPage.jsx - PÄRIB PÄRIS PLAYLISTE
+// src/pages/BrowsePlaylistsPage.jsx - KORREKTNE KAHEASTMELINE PÄRING
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
 /* global qortalRequest */
+
+const ArtworkImage = ({ src, alt }) => {
+    const [isError, setIsError] = useState(false);
+    const DefaultArtwork = () => (<div className="default-artwork"><svg width="40" height="40" viewBox="0 0 24 24"><path fill="#888" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" /></svg></div>);
+    if (isError || !src) return <DefaultArtwork />;
+    return <img src={src} alt={alt} onError={() => setIsError(true)} />;
+};
 
 function BrowsePlaylistsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,66 +25,31 @@ function BrowsePlaylistsPage() {
       setIsLoading(true);
       setError(null);
       if (typeof qortalRequest === 'undefined') {
-        setError("Qortal API not available.");
-        setIsLoading(false);
-        return;
+        setError("Qortal API not available."); setIsLoading(false); return;
       }
 
       try {
-        const offset = (currentPage - 1) * limit;
-
         const requestObject = {
-          action: "SEARCH_QDN_RESOURCES",
-          service: "PLAYLIST",
-          identifier: "qmusic_playlist_", // Otsime meie rakenduse playliste
-          prefix: true, // Oluline, et otsida alguse järgi
-          includeMetadata: true,
-          limit: limit,
-          offset: offset,
-          reverse: true, // Uusimad esimesena
+          action: "SEARCH_QDN_RESOURCES", service: "PLAYLIST", identifier: "qmusic_playlist_",
+          prefix: true, limit, offset: (currentPage - 1) * limit, reverse: true,
         };
-        
         const results = await qortalRequest(requestObject);
-        console.log("Leitud playlistid:", results);
 
         if (Array.isArray(results) && results.length > 0) {
-          // Siin peame playlisti meta-andmed välja lugema teisiti
-          // Kuna me salvestasime need DOCUMENT teenusega. Parandan!
-          // Ei, me salvestasime selle PLAYLIST teenusega ja andmed olid 'file' sees.
-          // See tähendab, et me peame need uuesti alla laadima.
           const playlistsWithDetails = await Promise.all(
-            results.map(async (playlist) => {
+            results.map(async (p) => {
               try {
-                // Päri iga playlisti JSON sisu
-                const playlistJson = await qortalRequest({
-                  action: "FETCH_QDN_RESOURCE",
-                  name: playlist.name,
-                  service: "PLAYLIST",
-                  identifier: playlist.identifier,
-                });
-                
-                const playlistData = JSON.parse(playlistJson);
-                
+                const jsonString = await qortalRequest({ action: "FETCH_QDN_RESOURCE", name: p.name, service: "PLAYLIST", identifier: p.identifier });
+                const data = JSON.parse(jsonString);
                 return {
-                  id: playlist.identifier,
-                  name: playlistData.title || "Tundmatu playlist",
-                  description: playlistData.description || "",
-                  owner: playlist.name,
-                  songCount: playlistData.songs?.length || 0,
-                  // Lisame ka thumbnaili URLi
-                  artworkUrl: `/thumbnail/${playlist.name}/${playlist.identifier}`,
+                  id: p.identifier, name: data.title || p.identifier, owner: p.name,
+                  songCount: data.songs?.length || 0,
+                  artworkUrl: `/thumbnail/${encodeURIComponent(p.name)}/${encodeURIComponent(p.identifier)}`,
                 };
-
-              } catch (e) {
-                console.error(`Could not fetch details for playlist ${playlist.identifier}`, e);
-                return null; // Kui detailide pärimine ebaõnnestub, jätame selle vahele
-              }
+              } catch { return null; }
             })
           );
-          
-          // Eemaldame need, mille detaile ei saanud kätte
-          setPlaylists(playlistsWithDetails.filter(p => p !== null));
-
+          setPlaylists(playlistsWithDetails.filter(Boolean));
         } else {
           setPlaylists([]);
         }
@@ -87,7 +59,6 @@ function BrowsePlaylistsPage() {
         setIsLoading(false);
       }
     };
-    
     fetchPlaylists();
   }, [currentPage]);
 
@@ -99,18 +70,17 @@ function BrowsePlaylistsPage() {
       <div className="browse-results">
         {isLoading && <p>Loading playlists...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {!isLoading && !error && playlists.length === 0 && <p>No playlists found.</p>}
+        {!isLoading && !error && playlists.length === 0 && <p>No Q-Music playlists found.</p>}
         {!isLoading && !error && playlists.length > 0 && (
           <div className="playlist-grid">
             {playlists.map(playlist => (
               <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="playlist-card">
-                <div className="song-item-artwork"> {/* Taaskasutame laulude stiili pildi jaoks */}
-                  <img src={playlist.artworkUrl} alt={playlist.name} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }} onLoad={(e) => { e.currentTarget.style.display = 'block'; e.currentTarget.nextSibling.style.display = 'none'; }} />
-                  <div className="default-artwork"><svg /* ... noodi ikoon ... */></svg></div>
+                <div className="song-item-artwork">
+                  <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
                 </div>
                 <h4>{playlist.name}</h4>
                 <p>{playlist.songCount} laulu</p>
-                <span className="playlist-owner">Looja: {playlist.owner}</span>
+                <span className="playlist-owner">By: {playlist.owner}</span>
               </Link>
             ))}
           </div>
@@ -124,5 +94,4 @@ function BrowsePlaylistsPage() {
     </div>
   );
 }
-
 export default BrowsePlaylistsPage;
