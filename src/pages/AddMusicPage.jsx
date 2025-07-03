@@ -1,4 +1,4 @@
-// src/pages/AddMusicPage.jsx - ÜKS ACTION, ÜKS FAIL (BASE64)
+// src/pages/AddMusicPage.jsx - Mitme ressursi avaldamine
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,53 +17,69 @@ function AddMusicPage({ currentUser }) {
     }
   };
 
-  const toBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = error => reject(error);
-  });
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!selectedFile || !currentUser?.name) {
-      alert('Faili valimine ja sisselogimine on kohustuslikud.'); return;
+    if (!title || !artist || !selectedFile || !currentUser?.name) {
+      alert('All fields are required and you must be logged in..');
+      return;
     }
     if (typeof qortalRequest === 'undefined') {
-      alert("Qortali API-t ei leitud."); return;
+      alert("Qortal API not found.");
+      return;
     }
 
     setIsUploading(true);
 
     try {
-      console.log("Konverdin faili base64-ks...");
-      const fileAsBase64 = await toBase64(selectedFile);
-      console.log("Konvertimine õnnestus.");
-
+      // 1. Loome unikaalse identifikaatori, mida kasutavad mõlemad ressursid
       const identifier = `qmusic_${currentUser.name.replace(/ /g, '_')}_${Date.now()}`;
+      
+      // 2. Loome meta-andmete objekti ja stringi
+      const metadataObject = { title: title, artist: artist };
+      const metadataString = JSON.stringify(metadataObject);
+      
+      // 3. Koostame ressursside massiivi
+      const resourcesToPublish = [
+        { // Esimene ressurss: Audiofail ise
+          name: currentUser.name,
+          service: "AUDIO",
+          identifier: identifier,
+          file: selectedFile // Anname kaasa päris File objekti
+        },
+        { // Teine ressurss: Meta-andmed eraldi dokumendina
+          name: currentUser.name,
+          service: "DOCUMENT", // Kasutame üldist DOCUMENT teenust
+          identifier: identifier, // SAMA identifier seob need kokku
+          data: metadataString, // Saadame JSON-stringi siin
+          // Nimetame selle faili, et see oleks äratuntav
+          filename: "metadata.json"
+        }
+      ];
+      // Tulevikus lisame siia ka THUMBNAIL ressursi
 
-      // **** OLULINE MUUDATUS: ÜKS ACTION, ÜKS RESSURSS ****
+      // 4. Koostame lõpliku päringu objekti
       const requestObject = {
-        action: "PUBLISH_QDN_RESOURCE", // Kasutame lihtsamat actionit
-        name: currentUser.name,
-        service: "AUDIO",
-        identifier: identifier,
-        data64: fileAsBase64, // Saadame Base64 andmed
+        action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+        resources: resourcesToPublish
       };
-
-      console.log('Sending a Qortal request (simplified base64):', requestObject);
+      
+      // Peamine 'name' parameeter ei ole PUBLISH_MULTIPLE... actionil vajalik,
+      // kuna see on iga ressursi sees olemas.
+      
+      console.log('Sending multiple resources to Qortal:', requestObject);
       const result = await qortalRequest(requestObject);
       
       if (result === true) {
-        alert(`File successfully published!`);
+        alert(`Song "${title}" has been successfully published!`);
         navigate('/songs');
       } else {
         throw new Error(`The API did not return a successful response, but: ${JSON.stringify(result)}`);
       }
+
     } catch (error) {
-      console.error('Song publishing error:', error);
+      console.error('Error publishing song:', error);
       const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Publishing failed. API returned an error.:\n\n${errorMessage}`);
+      alert(`Failed to publish song. API returned an error.:\n\n${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
