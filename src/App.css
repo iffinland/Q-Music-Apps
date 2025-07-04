@@ -713,14 +713,22 @@ SIDEBAR STATS styles
 ======================================================== S*/
 .song-item { position: relative; }
 .add-to-playlist-btn {
-  position: absolute; top: 8px; right: 8px;
-  background-color: rgba(0,0,0,0.7); color: white;
-  border: none; border-radius: 50%;
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; opacity: 0; transition: opacity 0.2s;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(24, 24, 24, 0.7); /* Veidi tumedam läbipaistev taust */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* JÄTA OPACITY VÄLJA, et nupp oleks alati nähtav */
+  transition: background-color 0.2s;
 }
-.song-item:hover .add-to-playlist-btn { opacity: 1; }
 .add-to-playlist-btn:hover { background-color: #1DB954; }
 
 /* Modaalaken */
