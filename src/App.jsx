@@ -54,7 +54,6 @@ function App() {
   };
   
   const handleSaveToPlaylist = (song, playlistId) => {
-    // See on see koht, kuhu tuleb hiljem päris API loogika
     console.log(`Saving song "${song.title}" to playlist with ID: ${playlistId}`);
     alert(`(Simulated) Saved ${song.title} to playlist!`);
     setIsModalOpen(false);

@@ -33,9 +33,7 @@ function SongItem({ song, onSelect, onAddToPlaylistClick }) {
   };
 
   return (
-    // See on see ainus ja õige vanem-element
     <div className="song-item">
-      {/* Pildi ja loo nime osa on eraldi klikitav konteiner */}
       <div className="song-item-main-clickable" onClick={() => onSelect(song)}>
         <div className="song-item-artwork">
           <ArtworkImage src={song.artworkUrl} alt={song.title} />
@@ -46,12 +44,16 @@ function SongItem({ song, onSelect, onAddToPlaylistClick }) {
         </div>
       </div>
       
-      {/* Nupp playlisti lisamiseks kuvatakse ainult siis, kui vastav funktsioon on olemas */}
-      {onAddToPlaylistClick && (
-        <button className="add-to-playlist-btn" onClick={handleAddClick} title="Add to playlist">
-          <AddIcon />
-        </button>
-      )}
+      <button 
+        className="add-to-playlist-btn" 
+        onClick={(e) => {
+            e.stopPropagation(); 
+            onAddToPlaylistClick(song); // Kutsub App.jsx funktsiooni
+        }} 
+        title="Add to playlist"
+      >
+        <AddIcon />
+      </button>
     </div>
   );
 }
