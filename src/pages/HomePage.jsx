@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx
+// src/pages/HomePage.jsx - PARANDATUD FUNKTSIOONI SIGANTUURIGA
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MusicList from '../components/MusicList';
@@ -12,72 +12,82 @@ const ArtworkImage = ({ src, alt }) => {
     return <img src={src} alt={alt} onError={() => setIsError(true)} />;
 };
 
-function HomePage({ onSongSelect }) {
-    const [latestSongs, setLatestSongs] = useState([]);
+// **** SIIN ON PARANDATUD FUNKTSIOONI SIGANTUUR ****
+function HomePage({ songs, onSongSelect, onAddToPlaylistClick }) {
     const [latestPlaylists, setLatestPlaylists] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    
-    useEffect(() => {
-        const fetchData = async () => {
-            if (typeof qortalRequest === 'undefined') { setIsLoading(false); return; }
-            setIsLoading(true);
 
-            const songPromise = qortalRequest({ action: "SEARCH_QDN_RESOURCES", service: "AUDIO", includeMetadata: true, limit: 25, reverse: true, });
-            const playlistPromise = qortalRequest({ action: "SEARCH_QDN_RESOURCES", service: "PLAYLIST", identifier: "qmusic_playlist_", prefix: true, includeMetadata: true, limit: 5, reverse: true });
-            
-            const [songResults, playlistResults] = await Promise.allSettled([songPromise, playlistPromise]);
-            
-            if (songResults.status === 'fulfilled' && Array.isArray(songResults.value)) {
-                const formattedSongs = songResults.value.map(item => {
-                    let finalArtist = item.name || "Unknown";
-                    if(item.metadata?.description?.includes('artist=')) {
-                        const artistMatch = item.metadata.description.match(/artist=([^;]+)/);
-                        if (artistMatch?.[1]) finalArtist = artistMatch[1].trim();
-                    }
-                    return { id: item.identifier, title: item.metadata?.title || item.identifier, artist: finalArtist, qdnData: { name: item.name, service: 'AUDIO', identifier: item.identifier }, artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}`};
-                });
-                setLatestSongs(formattedSongs);
+    // See useEffect pärib ainult playliste. Laulud tulevad propsidena App.jsx-ist
+    useEffect(() => {
+        setIsLoading(true); // Seame laadimise alguse
+
+        const fetchPlaylists = async () => {
+            if (typeof qortalRequest === 'undefined') {
+                setIsLoading(false);
+                return;
             }
-            
-            if (playlistResults.status === 'fulfilled' && Array.isArray(playlistResults.value)) {
-                setLatestPlaylists(playlistResults.value.map(item => ({
-                    id: item.identifier,
-                    name: item.metadata?.title || item.identifier,
-                    owner: item.name,
-                    artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}`,
-                    description: item.metadata?.description || ""
-                })));
+            try {
+                const results = await qortalRequest({ action: "SEARCH_QDN_RESOURCES", service: "DOCUMENT", identifier: "qmusic_playlist_", prefix: true, includeMetadata: true, limit: 5, reverse: true });
+                if (Array.isArray(results) && results.length > 0) {
+                     const playlistsWithDetails = await Promise.all(
+                        results.map(async p => { 
+                            try { 
+                                const json = await qortalRequest({ action: "FETCH_QDN_RESOURCE", name: p.name, service: "DOCUMENT", identifier: p.identifier });
+                                const data = JSON.parse(json);
+                                return { id: p.identifier, name: data.title || p.identifier, owner: p.name, description: data.description || "", artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(p.name)}/${encodeURIComponent(p.identifier)}`};
+                            } catch { return null; }
+                        })
+                     );
+                     setLatestPlaylists(playlistsWithDetails.filter(p => p !== null));
+                }
+            } catch (e) {
+                console.error("Error fetching playlists for homepage:", e);
+            } finally {
+                // Kuigi laulud on juba olemas, näitame laadimist, kuni playlistid on ka laetud
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
-        fetchData();
+
+        fetchPlaylists();
+        // Kuna laulud tulevad propsidena, siis me ei pea neid siin uuesti pärima
+        // see teeb komponendi kiiremaks ja loogilisemaks. App.jsx hoolitseb laulude eest.
     }, []);
+
 
     return (
         <div className="homepage">
             <section className="horizontal-scroll-section">
                 <h2>Popular Songs</h2>
-                {isLoading ? <p>Loading songs...</p> : <MusicList songsData={latestSongs} onSongSelect={onSongSelect} listClassName="horizontal-music-list" />}
+                {/* Me ei vaja siin laulude laadimise indikaatorit, sest nad on juba olemas propsides */}
+                <MusicList
+                    songsData={songs} // Kasutame App.jsx-ist saadud laule
+                    onSongSelect={onSongSelect}
+                    onAddToPlaylistClick={onAddToPlaylistClick}
+                    listClassName="horizontal-music-list"
+                />
             </section>
+            
             <section className="horizontal-scroll-section">
                 <h2>Recent Playlists</h2>
-                <div className="horizontal-playlist-grid">
-                    {isLoading ? <p>Loading playlists...</p> : (
-                      latestPlaylists.length > 0 ? latestPlaylists.map(playlist => (
-                          <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="playlist-card">
-                              <div className="song-item-artwork">
-                                 <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
-                              </div>
-                              <div className="playlist-card-info">
-                                  <h4>{playlist.name}</h4>
-                              </div>
-                              <span className="playlist-owner">By: {playlist.owner}</span>
-                          </Link>
-                      )) : <p>No playlists found yet.</p>
-                    )}
-                </div>
+                {isLoading ? <p>Loading playlists...</p> : (
+                    <div className="horizontal-playlist-grid">
+                        {latestPlaylists.length > 0 ? latestPlaylists.map(playlist => (
+                            <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="playlist-card">
+                                <div className="song-item-artwork">
+                                   <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
+                                </div>
+                                <div className="playlist-card-info">
+                                    <h4>{playlist.name}</h4>
+                                    <p className="playlist-card-description">{playlist.description}</p>
+                                </div>
+                                <span className="playlist-owner">By: {playlist.owner}</span>
+                            </Link>
+                        )) : <p>No Q-Music playlists found yet.</p>}
+                    </div>
+                )}
             </section>
         </div>
     );
 }
+
 export default HomePage;

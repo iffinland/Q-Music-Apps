@@ -87,6 +87,7 @@ function AddMusicPage({ currentUser }) {
 
   return (
     <div className="form-page-container">
+      <p><h4><font color="red">Don't use special symbols or ÄÄÕÜ characters at the moment, they will only cause errors at the moment.</font></h4></p>
       <h2>Upload New Song</h2>
       <p>Publisher: <strong>{currentUser ? currentUser.name : 'Not logged in'}</strong></p>
       <form onSubmit={handleSubmit}>

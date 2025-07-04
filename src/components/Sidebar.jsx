@@ -49,6 +49,7 @@ function Sidebar({ isLoggedIn, currentUser }) {
   return (
     <aside className="sidebar">
       <section className="stats-section">
+        <p><h5><font color="orange">It doesn't work on mobile yet.</font></h5></p>
         <h5><b>S T A T I S T I C S</b></h5>
         <p>ALL QDN audio: {stats.songs}</p>
         <p>Q-Music Songs: 0</p>
