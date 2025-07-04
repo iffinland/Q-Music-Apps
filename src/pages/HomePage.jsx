@@ -57,7 +57,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
             console.log("HomePage: Loading playlists...");
             const playlistResults = await qortalRequest({
                 action: "SEARCH_QDN_RESOURCES",
-                service: "DOCUMENT", // Kasutame õiget teenust
+                service: "PLAYLIST", // Kasutame õiget teenust
                 identifier: "qmusic_playlist_",
                 prefix: true,
                 includeMetadata: true, // Küsides metaandmeid, saame 'title'

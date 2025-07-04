@@ -1,67 +1,98 @@
-// src/components/AddToPlaylistModal.jsx
+// src/components/AddToPlaylistModal.jsx - ILMA useAuth'ita
 import React, { useState, useEffect } from 'react';
 
-// See on modaalakna kest
+/* global qortalRequest */
+
 const Modal = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h2>{title}</h2>
+                <div className="modal-header">
+                  <h2>{title}</h2>
+                  <button onClick={onClose} className="close-modal-btn">×</button>
+                </div>
                 {children}
-                <button onClick={onClose}>Close</button>
             </div>
         </div>
     );
 };
 
-
-function AddToPlaylistModal({ song, isOpen, onClose, onSave }) {
+// See komponent võtab nüüd currentUser prop'ina
+function AddToPlaylistModal({ song, isOpen, onClose, onSave, currentUser }) {
     const [myPlaylists, setMyPlaylists] = useState([]);
-    const [selectedPlaylist, setSelectedPlaylist] = useState('');
+    const [selectedPlaylistId, setSelectedPlaylistId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (isOpen) {
-            // Kui aken avaneb, päri kasutaja playlistid (praegu mock)
-            setIsLoading(true);
-            console.log("Fetching user's playlists...");
-            setTimeout(() => {
-                setMyPlaylists([
-                    { id: 'playlist-1', name: 'Minu Suve Lood' },
-                    { id: 'playlist-2', name: 'Parim Trenniks' }
-                ]);
-                setIsLoading(false);
-            }, 1000);
+        // Päring käivitub ainult siis, kui aken avatakse ja kasutaja on olemas
+        if (isOpen && currentUser) {
+            const fetchUserPlaylists = async () => {
+                setIsLoading(true);
+                setMyPlaylists([]); // Tühjenda eelmine nimekiri
+                try {
+                    const results = await qortalRequest({
+                        action: "SEARCH_QDN_RESOURCES",
+                        service: "PLAYLIST", // Kasutasime DOCUMENT teenust playlistide salvestamiseks
+                        name: currentUser.name, // Otsime AINULT selle kasutaja playliste
+                        identifier: "qmusic_playlist_",
+                        prefix: true,
+                        includeMetadata: true,
+                        limit: 100,
+                    });
+
+                    if (Array.isArray(results) && results.length > 0) {
+                        setMyPlaylists(results.map(p => ({
+                            id: p.identifier,
+                            name: p.metadata?.title || p.identifier,
+                        })));
+                    }
+                } catch (error) {
+                    console.error("Error fetching user playlists:", error);
+                    alert("Could not load your playlists.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchUserPlaylists();
         }
-    }, [isOpen]);
+    }, [isOpen, currentUser]); // Käivitub uuesti, kui aken avatakse või kasutaja muutub
 
     const handleSave = () => {
-        if (!selectedPlaylist) {
+        if (!selectedPlaylistId) {
             alert("Please select a playlist.");
             return;
         }
-        onSave(song, selectedPlaylist); // Saadame laulu ja valitud playlisti ID tagasi
+        onSave(song, selectedPlaylistId);
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !song) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Add "${song?.title}" to playlist`}>
+        <Modal isOpen={isOpen} onClose={onClose} title={`Add "${song.title}" to playlist`}>
             {isLoading ? (
                 <p>Loading your playlists...</p>
-            ) : (
+            ) : myPlaylists.length > 0 ? (
                 <div className="playlist-selection">
-                    <select value={selectedPlaylist} onChange={e => setSelectedPlaylist(e.target.value)}>
-                        <option value="" disabled>Select a playlist</option>
+                    <p>Select one of your playlists:</p>
+                    <div className="playlist-list-box">
                         {myPlaylists.map(pl => (
-                            <option key={pl.id} value={pl.id}>{pl.name}</option>
+                           <div 
+                                key={pl.id} 
+                                className={`playlist-option ${selectedPlaylistId === pl.id ? 'selected' : ''}`}
+                                onClick={() => setSelectedPlaylistId(pl.id)}
+                            >
+                                {pl.name}
+                           </div>
                         ))}
-                    </select>
-                    <button onClick={handleSave}>Save</button>
+                    </div>
+                    <button onClick={handleSave} disabled={!selectedPlaylistId}>Save to Playlist</button>
                 </div>
+            ) : (
+                <p>You haven't created any playlists yet. Go to "Create New Playlist" to start.</p>
             )}
         </Modal>
     );
 }
+
 export default AddToPlaylistModal;

@@ -49,11 +49,63 @@ function App() {
     setIsModalOpen(true);
   };
   
-  const handleSaveToPlaylist = (song, playlistId) => {
-    console.log(`Saving song "${song.title}" to playlist with ID: ${playlistId}`);
-    alert(`(Simulated) Saved ${song.title} to playlist!`);
-    setIsModalOpen(false);
-  };
+  const handleSaveToPlaylist = async (song, playlistIdentifier) => {
+  if (!song || !playlistIdentifier || !currentUser) {
+    alert("Error: Missing song, playlist, or user info.");
+    return;
+  }
+  
+  setIsModalOpen(false);
+  alert(`Adding "${song.title}" to your playlist... Please click the OK button.`);
+
+  try {
+    // SAMM 1: PÄRI OLEMASOLEV PLAYLIST
+    const jsonString = await qortalRequest({
+      action: "FETCH_QDN_RESOURCE",
+      name: currentUser.name, // Sisselogitud kasutaja nimi
+      service: "PLAYLIST",     // Meie playlisti teenus
+      identifier: playlistIdentifier,
+    });
+    const playlistData = JSON.parse(jsonString);
+
+    // SAMM 2: UUENDAME SEDA. Lisame uue laulu info
+    const newSongEntry = {
+      identifier: song.id,
+      name: song.qdnData.name, // See on loo originaalavaldaja nimi
+    };
+    // Kontroll, et sama laulu ei lisataks topelt
+    if (playlistData.songs.some(s => s.identifier === newSongEntry.identifier)) {
+      alert("This song is already in the playlist.");
+      return;
+    }
+    playlistData.songs.push(newSongEntry);
+
+    // SAMM 3: AVALDAME UUENDATUD PLAYLISTI
+    const updatedPlaylistDataString = JSON.stringify(playlistData);
+    const updatedPlaylistFile = new File([updatedPlaylistDataString], "playlist.json", { type: "application/json" });
+
+    const result = await qortalRequest({
+      action: "PUBLISH_QDN_RESOURCE",
+      name: currentUser.name,
+      service: "PLAYLIST",
+      identifier: playlistIdentifier, // Kasutame SAMA identifikaatorit, et vana üle kirjutada
+      file: updatedPlaylistFile,
+      title: playlistData.title, // Saadame kaasa ka meta-andmed
+      description: playlistData.description,
+    });
+
+    if (result === true) {
+      alert("Song added to playlist successfully!");
+      // Tulevikus saaks siin andmeid värskendada
+    } else {
+      throw new Error("API did not return a successful response.");
+    }
+
+  } catch (error) {
+    console.error("Error saving to playlist:", error);
+    alert(`Failed to add song to playlist: ${error.message || "Unknown error."}`);
+  }
+};
 
   const actualSearchHandler = (searchTerm) => {
     if (searchTerm.trim()) {
@@ -131,6 +183,7 @@ function App() {
         onClose={() => setIsModalOpen(false)}
         song={songToAdd}
         onSave={handleSaveToPlaylist}
+        currentUser={currentUser}
       />
     </div>
   );

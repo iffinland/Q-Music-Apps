@@ -716,9 +716,9 @@ SIDEBAR STATS styles
   position: absolute;
   top: 8px;
   right: 8px;
-  background-color: rgba(24, 24, 24, 0.7); /* Veidi tumedam läbipaistev taust */
+  background-color: rgba(247, 216, 46, 0.7); /* Veidi tumedam läbipaistev taust */
   color: white;
-  border: none;
+  border: 1px;
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -742,3 +742,73 @@ SIDEBAR STATS styles
   border-radius: 8px; width: 90%; max-width: 500px;
 }
 .modal-content select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; }
+
+/* ==================================================
+====== Stiilid AddToPlaylistModal jaoks =========
+=================================================== */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: #888;
+  cursor: pointer;
+}
+.close-modal-btn:hover {
+  color: #fff;
+}
+
+.playlist-selection p {
+  margin-top: 0;
+}
+.playlist-list-box {
+  border: 1px solid #444;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+.playlist-option {
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #444;
+}
+.playlist-option:last-child {
+  border-bottom: none;
+}
+.playlist-option:hover {
+  background-color: #3a3a3a;
+}
+.playlist-option.selected {
+  background-color: #1DB954; /* Spotify roheline */
+  font-weight: bold;
+}
+
+.playlist-selection button {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #1DB954;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+.playlist-selection button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
