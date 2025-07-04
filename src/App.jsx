@@ -28,13 +28,10 @@ function AppWrapper() {
 
 function App() {
   const navigate = useNavigate();
-  // Rakenduse põhiline olek
   const [songs, setSongs] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-
-  // Modaalakna olekud
   const [songToAdd, setSongToAdd] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -43,7 +40,6 @@ function App() {
 
   // Handler-funktsioonid
   const handleSelectSong = (song) => setSelectedSong(song);
-
   const handleOpenAddToPlaylistModal = (song) => {
     if (!isLoggedIn) {
       alert("Please log in to add songs to playlists.");
@@ -116,7 +112,7 @@ function App() {
       <div className="content-wrapper">
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<HomePage songs={songs.slice(0, 25)} onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
+            <Route path="/" element={<HomePage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/add-music" element={isLoggedIn ? <AddMusicPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/search" element={<SearchResultsPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
