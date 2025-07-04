@@ -18,7 +18,7 @@ function Header({ isLoggedIn, currentUser, onLoginClick, onLogoutClick, onSearch
           {isLoggedIn && currentUser ? (
             <button onClick={onLogoutClick} className="login-button">Log OUT({currentUser.name})</button>
           ) : (
-            <button onClick={onLoginClick} className="login-button">Log IN</button>
+            <button onClick={onLoginClick} className="login-button">Create NEW content</button>
           )}
         </nav>
       </div>
