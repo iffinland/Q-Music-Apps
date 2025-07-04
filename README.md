@@ -1,4 +1,4 @@
-# Q-Music apps for qortal to:
+# Q-Music apps for qortal to | Enjoy the music
 * Listen and share music with people in the Qortal community.
 * Listen to all the music found on QDN.
 * Publish new music and share it with everyone on Qortal for listening.
