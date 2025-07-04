@@ -75,6 +75,25 @@ function App() {
       await handleLogin();
     }
   };
+
+  const [songToAdd, setSongToAdd] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenAddToPlaylistModal = (song) => {
+    if (!isLoggedIn) {
+      alert("Please log in to add songs to a playlist.");
+      return;
+    }
+    setSongToAdd(song);
+    setIsModalOpen(true);
+  };
+  
+  const handleSaveToPlaylist = (song, playlistId) => {
+    // **** SIIA TULEB HILJEM PÄRIS API LOOGIKA ****
+    console.log(`Saving song "${song.title}" to playlist ID "${playlistId}"...`);
+    alert(`(Simulated) Saved ${song.title} to playlist!`);
+    setIsModalOpen(false);
+  };
   
   return (
     <div className="app-container">
@@ -97,6 +116,7 @@ function App() {
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />
             <Route path="/playlist/:playlistId" element={<PlaylistDetailPage onSongSelect={handleSelectSong} />} />
             <Route path="/song/:songId" element={<SongDetailPage onSongSelect={handleSelectSong} />} />
+            <Route path="/" element={<HomePage onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="*" element={<div><h2>404</h2></div>} />
           </Routes>
         </main>

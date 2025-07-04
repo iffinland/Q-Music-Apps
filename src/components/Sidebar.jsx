@@ -50,8 +50,8 @@ function Sidebar({ isLoggedIn, currentUser }) {
     <aside className="sidebar">
       <section className="stats-section">
         <h5><b>S T A T I S T I C S</b></h5>
-        <p>ALL Songs: {stats.songs}</p>
-        <p>Q-Muisc Songs: 0</p>
+        <p>ALL QDN audio: {stats.songs}</p>
+        <p>Q-Music Songs: 0</p>
         <p>Ear-Bump Songs: {stats.songs}</p>
         <p>Playlists: {stats.playlists}</p>
         <p>Publishers: {stats.publishers}</p>
