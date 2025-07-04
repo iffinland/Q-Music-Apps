@@ -372,11 +372,16 @@ body {
 /* ==========================================================================
    6. RESPONSIIVNE DISAIN (Mobiilivaade)
    ========================================================================== */
-@media (max-width: 720px) {
+   @media (max-width: 720px) {
   .content-wrapper {
     flex-direction: column;
   }
-  .sidebar {
+
+  /* Hide your Sidebar on Mobile Globally */
+@media (max-width: 767px) {
+	.sidebar { display: none; }
+}
+ .sidebar {
     width: 100%;
     order: -1;
     border-left: none;
@@ -390,7 +395,9 @@ body {
   }
 }
 
-/* --- PARANDUS HORISONTAALSETE RIDADE JAOKS --- */
+/* =========================================================================
+=================== PARANDUS HORISONTAALSETE RIDADE JAOKS ==================
+========================================================================= */
 
 /* Konteiner, mis teeb sisu horisontaalseks ja keritavaks */
 .horizontal-music-list, .horizontal-playlist-grid {
@@ -412,7 +419,9 @@ body {
   /* Siia võid lisada veel stiile, nt background-color, border-radius jne */
 }
 
-/* --- BROWSE SONGS --- */
+/* =========================================================
+======================== BROWSE SONGS styles ===============
+========================================================== */
 /* Lisa see oma App.css faili lõppu */
 
 .browse-page h2 {
@@ -434,7 +443,9 @@ body {
   width: auto; /* Laseme gridil laiuse määrata */
 }
 
-/* --- Browse Playlist --- */
+/* =================================================================
+==================== Browse Playlist styles  ======================
+================================================================== */
 
 .playlist-grid {
   display: grid;
@@ -473,7 +484,9 @@ body {
   margin-top: 1rem;
 }
 
-/* PlaylistDetailPage styles */
+/* =====================================================
+================ PlaylistDetailPage styles =============
+===================================================== */
 .playlist-detail-page .playlist-header {
   display: flex;
   align-items: flex-end;
@@ -520,7 +533,9 @@ body {
   margin-top: 0.25rem;
 }
 
-/* See muudab MusicListi vertikaalseks nimekirjaks sellel lehel */
+/* ===============================================================
+== See muudab MusicListi vertikaalseks nimekirjaks sellel lehel ==
+=============================================================== */
 .vertical-music-list {
   display: flex;
   flex-direction: column;
