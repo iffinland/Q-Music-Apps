@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Impordi useNavigate
 
-function SearchBox({ placeholderText = "Otsi..." }) {
+function SearchBox({ placeholderText = "SEARCHING..." }) {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
