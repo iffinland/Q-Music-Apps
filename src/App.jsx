@@ -51,57 +51,58 @@ function App() {
   
   const handleSaveToPlaylist = async (song, playlistIdentifier) => {
     if (!song || !playlistIdentifier || !currentUser) return;
-    
-    alert(`Adding "${song.title}"... Please confirm transaction.`);
     setIsModalOpen(false);
 
     try {
-        // SAMM 1: PÄRI OLEMASOLEV PLAYLISTI OBJEKT
+        const info = await qortalRequest({ action: 'SEARCH_QDN_RESOURCES', identifier: playlistIdentifier, limit: 1 });
+        if (!info?.[0]) throw new Error("Could not find the playlist to update.");
+        
+        const publisherName = info[0].name;
+        if (publisherName !== currentUser.name) {
+            alert("You can only add songs to your own playlists."); return;
+        }
+
+        // SAMM 1: PÄRI playlisti OBJEKT
         const playlistData = await qortalRequest({
             action: "FETCH_QDN_RESOURCE",
-            name: currentUser.name,
+            name: publisherName,
             service: "PLAYLIST",
             identifier: playlistIdentifier,
         });
 
+        // KONTROLL: veendu, et saime objekti
         if (typeof playlistData !== 'object' || playlistData === null) {
             throw new Error("Could not fetch valid playlist data.");
         }
         
-        // SAMM 2: UUENDAME OBJEKTI
-        const newSongEntry = {
-            identifier: song.id,
-            name: song.qdnData.name,
-        };
+        // SAMM 2: Lisa laul
+        const newSongEntry = { identifier: song.id, name: song.qdnData.name };
+        if (!playlistData.songs) playlistData.songs = []; // Veendu, et 'songs' massiiv on olemas
         if (playlistData.songs.some(s => s.identifier === newSongEntry.identifier)) {
-            alert("This song is already in the playlist.");
-            return;
+            alert("Song is already in this playlist."); return;
         }
         playlistData.songs.push(newSongEntry);
 
-        // SAMM 3: Me EI tee JSON.stringify. API teeb seda ise.
-        // Me avaldame uuendatud JavaScripti OBJEKTI otse 'data' parameetriga.
-        // See on see, mida veateade meile tegelikult ütles.
+        // SAMM 3: Loo uus fail UUENDATUD OBJEKTI põhjal
+        const updatedFile = new File([JSON.stringify(playlistData)], `${playlistIdentifier}.json`, { type: "application/json" });
 
+        // SAMM 4: Avalda see uus fail
         const result = await qortalRequest({
             action: "PUBLISH_QDN_RESOURCE",
             name: currentUser.name,
             service: "PLAYLIST",
             identifier: playlistIdentifier,
-            data: playlistData, // <-- Anname otse objekti, mitte stringi
+            file: updatedFile,
             title: playlistData.title,
             description: playlistData.description,
         });
 
-        if (result === true) {
-            alert("Song added successfully!");
-            // Värskendame andmeid (see funktsioon on juba App.jsx-is olemas)
-            fetchData(); // Eeldusel, et oled pärimise funktsiooni eraldanud
-        } else {
-            throw new Error("API did not return a successful response.");
-        }
+        if (result !== true) throw new Error("API did not confirm the update.");
+        
+        alert("Song added successfully!");
+        // fetchData(); // Värskenda andmeid
     } catch (error) {
-        alert(`Failed to add song: ${error.message || "Unknown error."}`);
+        alert(`Failed to add song: ${error.message}`);
     }
 };
 
