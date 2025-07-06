@@ -75,7 +75,6 @@ function App() {
             throw new Error("Could not fetch valid playlist data.");
         }
         
-        // SAMM 2: Lisa laul
         const newSongEntry = { identifier: song.id, name: song.qdnData.name };
         if (!playlistData.songs) playlistData.songs = []; // Veendu, et 'songs' massiiv on olemas
         if (playlistData.songs.some(s => s.identifier === newSongEntry.identifier)) {
@@ -83,10 +82,8 @@ function App() {
         }
         playlistData.songs.push(newSongEntry);
 
-        // SAMM 3: Loo uus fail UUENDATUD OBJEKTI põhjal
         const updatedFile = new File([JSON.stringify(playlistData)], `${playlistIdentifier}.json`, { type: "application/json" });
 
-        // SAMM 4: Avalda see uus fail
         const result = await qortalRequest({
             action: "PUBLISH_QDN_RESOURCE",
             name: currentUser.name,
