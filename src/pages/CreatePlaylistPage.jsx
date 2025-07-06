@@ -1,4 +1,4 @@
-// src/pages/CreatePlaylistPage.jsx - KOOS PILDI üleslaadimisega
+// src/pages/CreatePlaylistPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,13 +8,11 @@ function CreatePlaylistPage({ currentUser }) {
   const navigate = useNavigate();
   const [playlistName, setPlaylistName] = useState('');
   const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState(null); // Uus olek pildifailile
+  const [imageFile, setImageFile] = useState(null); // Lisatud kaanepildi jaoks
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleImageFileChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setImageFile(event.target.files[0]);
-    }
+  const handleImageFileChange = (e) => {
+    if (e.target.files?.[0]) setImageFile(e.target.files[0]);
   };
 
   const handleSubmit = async (event) => {
@@ -22,62 +20,48 @@ function CreatePlaylistPage({ currentUser }) {
     if (!playlistName || !currentUser?.name) {
       alert('Playlist name and login are required.'); return;
     }
-    // Kaanepilt on valikuline, nii et me ei kontrolli seda siin.
-    
-    if (typeof qortalRequest === 'undefined') {
-      alert("Qortal API not found."); return;
-    }
-
     setIsCreating(true);
-
     try {
       const identifier = `qmusic_playlist_${currentUser.name.replace(/ /g, '_')}_${Date.now()}`;
-      
-      // Playlisti andmed lähevad eraldi meta-andmete ressursina
-      const metadataObject = { title: playlistName, description: description, songs: [] };
-      const metadataString = JSON.stringify(metadataObject);
-      const metadataFile = new File([metadataString], "metadata.json", { type: "application/json" });
-      
-      // Koostame ressursside massiivi
+      const metadataObject = { title: playlistName, description, songs: [] };
+      const metadataFile = new File([JSON.stringify(metadataObject)], `${identifier}.json`, { type: "application/json" });
+
       const resourcesToPublish = [
-        // RESSURSS 1: Meta-andmed .json failina
         {
           name: currentUser.name,
-          service: "PLAYLIST", // Või proovime siin "DOCUMENT"? "PLAYLIST" on loogilisem.
+          service: "PLAYLIST",
           identifier: identifier,
-          file: metadataFile, // Saadame JSONi failina
+          file: metadataFile, // Metaandmed on nüüd ise fail
+          filename: metadataFile.name, // **** KOHUSTUSLIK PARAMEETER ****
         }
       ];
 
-      // RESSURSS 2: Pildifail, KUI see on olemas
       if (imageFile) {
         resourcesToPublish.push({
           name: currentUser.name,
           service: "THUMBNAIL",
           identifier: identifier,
-          file: imageFile, // Saadame otse pildifaili
+          file: imageFile,
+          filename: imageFile.name, // **** KOHUSTUSLIK PARAMEETER ****
         });
       }
-      
+
       const requestObject = {
         action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
         resources: resourcesToPublish,
       };
 
-      console.log('Publishing playlist with image:', requestObject);
       const result = await qortalRequest(requestObject);
+
+      if (result !== true) throw new Error(`API did not confirm success. Response: ${JSON.stringify(result)}`);
       
-      if (result === true) {
-        alert(`Playlist "${playlistName}" created successfully!`);
-        navigate('/playlists');
-      } else {
-        throw new Error(`API returned an unexpected response: ${JSON.stringify(result)}`);
-      }
+      alert(`Playlist "${playlistName}" created successfully!`);
+      // Värskendame lehe, et näha uut sisu
+      navigate('/playlists');
+      setTimeout(() => window.location.reload(), 500);
 
     } catch (error) {
-      console.error('Error creating playlist:', error);
-      const errorMessage = (typeof error === 'object' && error !== null) ? JSON.stringify(error, null, 2) : error.toString();
-      alert(`Failed to create playlist. API Error:\n\n${errorMessage}`);
+      alert(`Failed to create playlist: ${error.message || 'Unknown error'}`);
     } finally {
       setIsCreating(false);
     }
@@ -97,14 +81,11 @@ function CreatePlaylistPage({ currentUser }) {
           <label htmlFor="description">Description (optional)</label>
           <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={isCreating} />
         </div>
-        
-        {/* **** UUS VÄLI PILDI VALIMISEKS **** */}
         <div className="form-group">
-          <label htmlFor="imageFile">Cover Image (optional)</label>
+          <label htmlFor="imageFile">Cover Image (Optional)</label>
           <input type="file" id="imageFile" onChange={handleImageFileChange} accept="image/*" disabled={isCreating} />
           {imageFile && <p>Image: {imageFile.name}</p>}
         </div>
-
         <button type="submit" disabled={!currentUser || isCreating}>
           {isCreating ? 'Creating...' : 'Create Playlist'}
         </button>

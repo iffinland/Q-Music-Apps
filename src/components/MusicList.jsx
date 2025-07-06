@@ -2,7 +2,6 @@
 import React from 'react';
 import SongItem from './SongItem';
 
-// **** VÕTA PROP VASTU ja anna EDASI ****
 function MusicList({ songsData = [], onSongSelect, onAddToPlaylistClick, listClassName = "music-list" }) {
   if (songsData.length === 0) return null;
 
@@ -15,7 +14,6 @@ function MusicList({ songsData = [], onSongSelect, onAddToPlaylistClick, listCla
             key={uniqueKey}
             song={song}
             onSelect={onSongSelect} // Jääb samaks
-            // **** SEE ON OLULINE RIDA ****
             onAddToPlaylistClick={onAddToPlaylistClick}
           />
         );
