@@ -7,7 +7,7 @@ function Header({ isLoggedIn, currentUser, onLoginClick, onLogoutClick, onSearch
   return (
     <header className="app-header">
       <div className="header-main-row">
-        <img src="q-music.gif" alt="Q-Music" />
+        <img src="qmusic.png" alt="Q-Music" height="60" width="60"/>
         <h1><Link to="/" className="logo-link">Q-Music</Link></h1>
         <nav>
           <Link to="/" className="header-link">Homepage</Link>
