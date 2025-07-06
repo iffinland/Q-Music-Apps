@@ -18,7 +18,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     );
 };
 
-// See komponent võtab nüüd currentUser prop'ina
 function AddToPlaylistModal({ song, isOpen, onClose, onSave, currentUser }) {
     const [myPlaylists, setMyPlaylists] = useState([]);
     const [selectedPlaylistId, setSelectedPlaylistId] = useState('');
