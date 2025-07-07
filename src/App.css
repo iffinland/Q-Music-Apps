@@ -1172,3 +1172,15 @@ SIDEBAR STATS styles
   border-radius: 6px;
   text-align: left;
 }
+
+/* miskid SIDEBAR stiilid */
+/* App.css lõppu */
+.sidebar {
+  transition: transform 0.3s ease-in-out;
+}
+.sidebar.closed {
+  transform: translateX(100%); /* Lükkab külgriba paremale välja */
+}
+.sidebar.open {
+  transform: translateX(0); /* Toob külgriba tagasi */
+}
