@@ -13,6 +13,7 @@ const ArtworkImage = ({ src, alt }) => {
       </svg>
     </div>
   );
+
   if (isError || !src) return <DefaultArtwork />;
   return <img src={src} alt={alt} onError={() => setIsError(true)} />;
 };
@@ -28,7 +29,9 @@ function BrowsePlaylistsPage() {
   useEffect(() => {
     const fetchPlaylists = async () => {
       setIsLoading(true);
+
       if (typeof qortalRequest === 'undefined') {
+        console.warn("Qortal API not available.");
         setIsLoading(false);
         return;
       }
@@ -37,7 +40,7 @@ function BrowsePlaylistsPage() {
         const results = await qortalRequest({
           action: "SEARCH_QDN_RESOURCES",
           service: "PLAYLIST",
-          identifier: "playlist_", // match CreatePlaylistPage identifikaator
+          identifier: "qmusic_playlist_", // meie Q-Music prefiks
           prefix: true,
           includeMetadata: true,
           limit,
@@ -46,15 +49,22 @@ function BrowsePlaylistsPage() {
         });
 
         if (Array.isArray(results) && results.length > 0) {
-          const formattedPlaylists = results.map(item => ({
-            id: item.identifier,
-            name: item.metadata?.title || item.filename.replace('.json', ''),
-            owner: item.name,
-            filename: item.filename,
-            identifier: item.identifier,
-            artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}/${encodeURIComponent(item.filename.replace('.json', '.jpg'))}`,
-            description: item.metadata?.description || ""
-          }));
+          const formattedPlaylists = results.map(item => {
+            const filename = item.filename;
+            const title = item.metadata?.title || filename.replace('.json', '');
+            const description = item.metadata?.description || '';
+
+            return {
+              id: item.identifier,
+              name: title,
+              owner: item.name,
+              filename,
+              identifier: qmusic_playlist_,
+              artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}/${encodeURIComponent(filename.replace('.json', '.jpg'))}`,
+              description
+            };
+          });
+
           setPlaylists(formattedPlaylists);
         } else {
           setPlaylists([]);
@@ -62,6 +72,7 @@ function BrowsePlaylistsPage() {
 
       } catch (e) {
         console.error("Error fetching playlists:", e);
+        setPlaylists([]);
       } finally {
         setIsLoading(false);
       }
@@ -83,21 +94,22 @@ function BrowsePlaylistsPage() {
           <p>Loading playlists...</p>
         ) : (
           <div className="playlist-grid">
-            {playlists.length > 0 ? playlists.map(playlist => (
-              <Link
-                to={`/playlist/${encodeURIComponent(playlist.owner)}/${encodeURIComponent(playlist.identifier)}/${encodeURIComponent(playlist.filename)}`}
-                key={playlist.id}
-                className="playlist-card"
-              >
-                <div className="song-item-artwork">
-                  <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
-                </div>
-                <div className="playlist-card-info">
-                  <h4>{playlist.name}</h4>
-                  <p className="playlist-owner">By: {playlist.owner}</p>
-                </div>
-              </Link>
-            )) : <p>No playlists have been created yet.</p>}
+            {playlists.length > 0 ? (
+              playlists.map(playlist => (
+                <Link to={`/playlist/${playlist.owner}/${playlist.id}/${playlist.filename}`}>
+                  <div className="song-item-artwork">
+                    <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
+                  </div>
+                  <div className="playlist-card-info">
+                    <h4>{playlist.name}</h4>
+                    <p className="playlist-card-description">{playlist.description}</p>
+                    <span className="playlist-owner">By: {playlist.owner}</span>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p>No playlists have been created yet.</p>
+            )}
           </div>
         )}
       </div>
