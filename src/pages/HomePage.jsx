@@ -37,7 +37,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     action: "SEARCH_QDN_RESOURCES",
                     service: "AUDIO",
                     includeMetadata: true,
-                    limit: 10,
+                    limit: 30,
                     reverse: true,
                 });
 
@@ -116,27 +116,26 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                 )}
             </section>
 
-            <section className="horizontal-scroll-section">
-                <h2>Recently Created Playlists</h2>
-                {isLoading ? (
-                    <p>Loading playlists...</p>
-                ) : (
-                    <div className="horizontal-playlist-grid">
-                        {latestPlaylists.length > 0 ? latestPlaylists.map(playlist => (
-                            <Link to={`/playlist/${playlist.owner}/${playlist.id}/${playlist.filename}`}>
-                                <div className="song-item-artwork">
-                                    <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
-                                </div>
-                                <div className="playlist-card-info">
-                                    <h4>{playlist.name}</h4>
-                                    <p className="playlist-card-description">{playlist.description}</p>
-                                </div>
-                                <span className="playlist-owner">By: {playlist.owner}</span>
-                            </Link>
-                        )) : <p>No playlists found yet.</p>}
-                    </div>
-                )}
-            </section>
+            <section className="latest-playlists">
+        <h3>Recently Created Playlists</h3>
+        <div className="playlist-grid">
+          {latestPlaylists.map(playlist => (
+            <Link
+  key={playlist.id}
+  to={`/playlist/${playlist.owner}/${playlist.id}/${playlist.filename}`}
+  className="playlist-card"
+>
+              <div className="song-item-artwork">
+                <img src={playlist.artworkUrl} alt={playlist.name} />
+              </div>
+              <div className="playlist-card-info">
+                <h4>{playlist.name}</h4>
+                <p className="playlist-owner">By: {playlist.owner}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
         </div>
     );
 }

@@ -20,20 +20,18 @@ body {
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
-/* 🎯 DEFAULT layout – large screens */
 .content-wrapper {
   display: flex;
-  flex-direction: row; /* PANE vasakule main, paremale sidebar */
-  align-items: flex-start;
+  flex-direction: row;
+  flex-grow: 1;
 }
 
 /* Main content takes most of the space */
 .main-content {
-  flex: 1;
+  flex-grow: 1;
   padding: 1rem;
 }
 
@@ -41,11 +39,26 @@ body {
     SIDEBAR styles
    ========================================================================== */
 /* Sidebar – paremal küljel */
-.sidebar {
+ .sidebar {
   width: 250px;
-  border-left: 1px solid #ccc;
   padding: 1rem;
   background-color: #f9f9f9;
+  border-left: 1px solid #ccc;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-toggle-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 20px;
+  z-index: 1000;
 }
 
 .stats-section, .user-section {
@@ -370,33 +383,78 @@ body {
 /* ==========================================================================
    6. RESPONSIIVNE DISAIN (Mobiilivaade)
    ========================================================================== */
-/* Desktopis sidebar alati nähtav */
-@media (min-width: 768px) {
-  .sidebar {
-    display: block !important;
-    position: relative;
-    transform: none !important;
-    animation: none !important;
-  }
+/* ----------------------------
+   LAULU- JA PLAYLISTIDE GRID
+---------------------------- */
+.song-grid,
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
 }
 
-/* Mobiilis algselt peidus, toggle’ga nähtav */
-@media (max-width: 767px) {
+.song-item,
+.playlist-card {
+  background: #444040;
+  border-radius: 6px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  cursor: pointer;
+}
+
+.song-item-artwork img,
+.playlist-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* ----------------------------
+   LATEST SONGS – HORISONTAALNE SCROLL
+---------------------------- */
+.latest-songs .song-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+}
+
+.latest-songs .song-item {
+  min-width: 160px;
+  scroll-snap-align: start;
+}
+
+/* ----------------------------
+   RESPONSIVE @ 720px
+---------------------------- */
+@media (max-width: 720px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+
   .sidebar {
-    display: none;
     position: fixed;
     top: 0;
     right: 0;
-    height: 100vh;
-    width: 250px;
-    background-color: #111;
-    color: #fff;
+    height: 100%;
+    background: #f9f9f9;
+    transform: translateX(100%);
     z-index: 999;
-    padding: 1rem;
-    overflow-y: auto;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   }
+
   .sidebar.open {
+    transform: translateX(0%);
+  }
+
+  .sidebar-toggle-btn {
     display: block;
+  }
+
+  .main-content {
+    width: 100%;
   }
 }
 
@@ -978,7 +1036,7 @@ SIDEBAR STATS styles
   background: none;
   border: none;
   color: #1DB954;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.25rem;
   font-size: 0.9em;
 }
 .btn-text:hover {

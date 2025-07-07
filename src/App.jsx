@@ -135,7 +135,7 @@ function App() {
         };
         setIsLoggedIn(true);
         setCurrentUser(userToSet);
-        alert(`Welcome, ${userToSet.name}!`);
+        alert(`Greetings again, ${userToSet.name}! Great that you want to enjoy music again.`);
       } else {
         throw new Error("User account data could not be retrieved.");
       }
@@ -176,14 +176,28 @@ function App() {
             <Route path="/song/:name/:identifier" element={<SongDetailPage onSongSelect={handleSelectSong} />} />            <Route path="*" element={<div><h2>404 Not Found</h2><Link to="/">Go Home</Link></div>} />
           </Routes>
         </main>
-{/* Sidebar – alati nähtav desktopis, mobiilis toggle'iga */}
-{isLoggedIn && currentUser && (
-  <Sidebar
-    isLoggedIn={isLoggedIn}
-    currentUser={currentUser}
-    className={`sidebar ${showSidebar ? 'open sidebar-slide-in' : ''}`}
-  />
-)}      </div>
+
+{/* ✅ Sidebar dünaamilise klassiga */}
+        {isLoggedIn && currentUser && (
+          <Sidebar
+            isLoggedIn={isLoggedIn}
+            currentUser={currentUser}
+            className={`sidebar ${showSidebar ? 'open sidebar-slide-in' : 'sidebar-slide-out'}`}
+          />
+        )}
+
+        {/* ☰ Toggle nupp – ainult sisseloginutele */}
+        {isLoggedIn && currentUser && (
+          <button
+            className="sidebar-toggle-btn"
+            onClick={() => setShowSidebar(prev => !prev)}
+            title="Toggle Sidebar"
+          >
+            ☰
+          </button>
+        )}
+      </div>
+
       <Player currentSong={selectedSong} />
       <AddToPlaylistModal
         isOpen={isModalOpen}

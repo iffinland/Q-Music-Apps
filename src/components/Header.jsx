@@ -14,7 +14,7 @@ function Header({
   return (
     <header className="app-header" aria-label="Main site header">
       <div className="header-main-row">
-        <img src="/qmusic.png" alt="Q-Music logo" height="60" width="60" />
+        <img src="qmusic.png" alt="Q-MUSIC LOGO" height="60" width="60" />
         <h1><Link to="/" className="logo-link">Q-Music</Link></h1>
         
         <nav className="main-nav">
