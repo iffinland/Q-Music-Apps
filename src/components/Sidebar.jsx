@@ -48,7 +48,7 @@ function Sidebar({ isLoggedIn, currentUser, className }) {
         )}
 
         <div className="sidebar-footer">
-          <p>Q-Music • ALPHA</p>
+          <p>Q-Music • ALPHA UI</p>
         </div>
 
       </div>
