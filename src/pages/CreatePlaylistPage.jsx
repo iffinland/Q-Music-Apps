@@ -10,7 +10,7 @@ function CreatePlaylistPage({ currentUser }) {
   const [selectedSongs, setSelectedSongs] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
 
-  // ⏬ Lae kasutaja enda laulud (AUDIO)
+  // ✅ LAE KASUTAJA OMA LAULUD (AUDIO)
   const loadUserSongs = async () => {
     if (!currentUser?.name) return;
 
@@ -30,7 +30,6 @@ function CreatePlaylistPage({ currentUser }) {
     }
   };
 
-  // ⏬ Lae kasutaja playlistid (teenus PLAYLIST)
   const loadUserPlaylists = async () => {
     if (!currentUser?.name) return;
 
@@ -67,13 +66,17 @@ function CreatePlaylistPage({ currentUser }) {
       return;
     }
 
-    const identifier = `playlist_${currentUser.name}_${uuidv4()}`;
+    const identifier = `qmusic_playlist_${currentUser.name}_${uuidv4()}`;
     const filename = `${playlistName.replace(/ /g, '_')}.json`;
 
     const playlistData = {
       name: playlistName,
       createdBy: currentUser.name,
-      songs: selectedSongs,
+      songs: selectedSongs.map((s) => ({
+        name: s.name,
+        identifier: s.identifier,
+        filename: s.filename
+      })),
       createdAt: new Date().toISOString(),
     };
 
@@ -85,6 +88,8 @@ function CreatePlaylistPage({ currentUser }) {
         identifier,
         data: playlistData,
         filename,
+        title: playlistName,
+        description: `Playlist created by ${currentUser.name}`
       });
 
       if (result === true) {
@@ -100,9 +105,8 @@ function CreatePlaylistPage({ currentUser }) {
     }
   };
 
-  const getQdnUrl = (resource) => {
-    return `/arbitrary/AUDIO/${resource.name}/${resource.identifier}/${resource.filename}`;
-  };
+  const getQdnUrl = (resource) =>
+    `/arbitrary/AUDIO/${resource.name}/${resource.identifier}/${resource.filename}`;
 
   const getPlaylistContent = async (playlist) => {
     const url = `/arbitrary/PLAYLIST/${playlist.name}/${playlist.identifier}/${playlist.filename}`;
@@ -127,7 +131,9 @@ function CreatePlaylistPage({ currentUser }) {
           onChange={(e) => setPlaylistName(e.target.value)}
         />
       </div>
-      <h3>Select Songs:</h3>
+
+      <h3>Select Your Songs:</h3>
+      {userSongs.length === 0 && <p>You haven't published any songs yet.</p>}
       <ul>
         {userSongs.map((song) => (
           <li key={song.identifier}>
@@ -142,6 +148,7 @@ function CreatePlaylistPage({ currentUser }) {
           </li>
         ))}
       </ul>
+
       <button onClick={handleCreatePlaylist}>Create Playlist</button>
 
       <hr />

@@ -40,7 +40,7 @@ function BrowsePlaylistsPage() {
         const results = await qortalRequest({
           action: "SEARCH_QDN_RESOURCES",
           service: "PLAYLIST",
-          identifier: "qmusic_playlist_", // meie Q-Music prefiks
+          identifier: "qmusic_playlist_",
           prefix: true,
           includeMetadata: true,
           limit,
@@ -59,7 +59,7 @@ function BrowsePlaylistsPage() {
               name: title,
               owner: item.name,
               filename,
-              identifier: qmusic_playlist_,
+              identifier: item.identifier, // ✅ FIX: õige ID
               artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}/${encodeURIComponent(filename.replace('.json', '.jpg'))}`,
               description
             };
@@ -95,8 +95,12 @@ function BrowsePlaylistsPage() {
         ) : (
           <div className="playlist-grid">
             {playlists.length > 0 ? (
-              playlists.map(playlist => (
-                <Link to={`/playlist/${playlist.owner}/${playlist.id}/${playlist.filename}`}>
+              playlists.map((playlist) => (
+                <Link
+  key={playlist.id}
+  to={`/playlist/${playlist.owner}/${playlist.id}/${playlist.filename}`}
+  className="playlist-card"
+>
                   <div className="song-item-artwork">
                     <ArtworkImage src={playlist.artworkUrl} alt={playlist.name} />
                   </div>
