@@ -1,15 +1,21 @@
 // src/components/SearchBox.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Impordi useNavigate
+import { useNavigate } from 'react-router-dom';
 
-function SearchBox({ placeholderText = "Type a search term to search for" }) {
+function SearchBox({ onActualSearch, placeholderText = "Type a search term to search for" }) {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+
+    const term = searchTerm.trim();
+    if (!term) return;
+
+    if (typeof onActualSearch === 'function') {
+      onActualSearch(term); // lase Headeril või parentil otsustada, mida teha
+    } else {
+      navigate(`/search?q=${encodeURIComponent(term)}`);
     }
   };
 

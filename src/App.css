@@ -1,8 +1,5 @@
-/* src/App.css - TÄIELIK JA PARANDATUD VERSIOON */
-
-/* ==========================================================================
-   1. ÜLDINE LEHE STIIL JA VÄRVISKEEM
-   ========================================================================== */
+/* src/App.css 
+/* ======= ÜLDINE LEHE STIIL JA VÄRVISKEEM ========== */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -14,40 +11,37 @@ body {
   color: #e0e0e0;
 }
 
-/* ==========================================================================
-   BASIC STRUCTURE OF THE APPLICATION
-   ========================================================================== */
+/* ========BASIC STRUCTURE OF THE APPLICATION ===================== */
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  background-color: #1a1a1a;
 }
 
+/* 🎯 DEFAULT layout – large screens */
 .content-wrapper {
   display: flex;
-  flex-grow: 1;
-  overflow: hidden; 
-}
-
-.main-content {
-  flex-grow: 1;
+  flex-direction: row; /* PANE vasakule main, paremale sidebar */
+  align-items: flex-start;
+  flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
-  /* OLULINE: Väldime sellel elemendil enda sisu tõttu laienemist */
-  min-width: 0; 
+  padding-bottom: 110px; /* Jätame ruumi playeri jaoks (90px + 20px vahe) */
 }
 
-/* ==========================================================================
-    SIDEBAR styles
-   ========================================================================== */
+/* Main content takes most of the space */
+.main-content {
+  flex: 1;
+  padding: 1rem;
+  max-width: calc(100% - 250px); /* Arvestame sidebar laiusega */
+}
+
+/* =========SIDEBAR styles ========== */
 .sidebar {
   width: 250px;
-  flex-shrink: 0;
-  background-color: #040404;
-  padding: 1.5rem;
-  overflow-y: auto;
-  border-left: 1px solid #282828;
+  border-left: 1px solid #ccc;
+  padding: 1rem;
+  background-color: #494646;
 }
 
 .stats-section, .user-section {
@@ -79,9 +73,7 @@ body {
   font-size: 1.1em;
 }
 
-/* ==========================================================================
-     HEADER styles
-   ========================================================================== */
+/* ===== HEADER styles =========== */
 .app-header {
   background-color: #282828;
   padding: 0 1.5rem; /* Padding ainult külgedel */
@@ -93,7 +85,6 @@ body {
   flex-direction: column; /* Lubame ridadel olla üksteise all */
 }
 
-/* See on peamine rida logo, menüü ja tegevuste jaoks */
 .header-main-row {
   display: flex;
   justify-content: space-between; /* Lükkab elemendid servadesse */
@@ -104,7 +95,6 @@ body {
 }
 
 .header-logo {
-  /* Logo on siin, flex-grow: 0 teeb selle nii laiaks kui vaja */
   flex-shrink: 0; /* Takistab logo kahanemist */
 }
 
@@ -117,9 +107,7 @@ body {
   text-decoration: none;
 }
 
-/* See on menüü, mis on keskel */
 .header-nav {
-  /* flex-grow: 1 laseb sel võtta kogu vaba ruumi logo ja tegevuste vahel */
   flex-grow: 1; 
   display: flex;
   justify-content: center; /* Joondab lingid selle ala keskele */
@@ -142,7 +130,6 @@ body {
   color: yellow;
 }
 
-/* Konteiner parempoolsetele elementidele */
 .header-actions-right {
   display: flex;
   align-items: center;
@@ -150,7 +137,6 @@ body {
   flex-shrink: 0; /* Takistab kahanemist */
 }
 
-/* Sisselogimise nupp paremal */
 .header-auth-nav .login-button {
   background-color: #1DB954;
   color: black;
@@ -166,7 +152,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Teine rida sisselogitud kasutaja "Lisa..." nuppude jaoks */
 .header-action-buttons {
   display: flex;
   gap: 1rem;
@@ -174,12 +159,13 @@ body {
   border-top: 1px solid #3c3c3c;
   justify-content: center;
 }
-/* ==========================================================================
-     PLAYER styles
-   ========================================================================== */
+/* ===== PLAYER styles ============ */
 .player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   height: 90px;
-  flex-shrink: 0;
   background-color: #181818;
   border-top: 1px solid #282828;
   display: grid;
@@ -187,6 +173,7 @@ body {
   align-items: center;
   padding: 0 1rem;
   gap: 2rem;
+  z-index: 1000;
 }
 
 .player-song-info {
@@ -267,7 +254,6 @@ body {
   border-radius: 50%;
 }
 
-/* player volume control styles */
 .player-volume-controls {
   display: flex;
   align-items: center;
@@ -319,29 +305,22 @@ body {
   border-radius: 50%;
 }
 
-/* ==========================================================================
-   5. LEHTEDE STIILID (pages/*.jsx)
-   ========================================================================== */
-/* Lehe-spetsiifilised konteinerid (need on main-content SEES) */
+/* =====LEHTEDE STIILID (pages/*.jsx) ======== */
 .page-container, .form-page-container, .homepage {
   width: 100%;
   max-width: 1200px; /* Saame seda väärtust muuta vastavalt vajadusele */
   margin: 0 auto; /* Tsentreerib sisu main-content ala sees */
 }
 
-/* Jätame alles ainult vormide konteineri piiramise, sest vormid ei pea olema täislaiuses */
 .form-page-container {
   max-width: 700px;
   margin: 2rem auto; /* Tsentreerib vormi ennast, aga mitte tervet lehte */
 }
 
-/* Spetsiifiliselt otsingutulemuste lehele, et see ei oleks liiga lai */
 .search-results-page { /* Selle klassinime pead lisama SearchResultsPage.jsx-i */
   max-width: 900px;
   margin: 0 auto;
 }
-
-/* **** SIIN ON PARANDUS JA LISATUD KOOD **** */
 
 .horizontal-scroll-section {
   margin-bottom: 2.5rem;
@@ -352,7 +331,6 @@ body {
   border-bottom: 1px solid #333;
 }
 
-/* Stiilid laulu- ja playlisti-kaartidele, mis on horisontaalses reas */
 .song-item, .playlist-card {
   flex: 0 0 160px; /* Fikseeritud laius: ei kasva, ei kahane, baaslaius 160px */
   background-color: #181818;
@@ -366,86 +344,79 @@ body {
 .song-item:hover, .playlist-card:hover {
   background-color: #282828;
 }
-/* **** PARANDUS LÕPPEB SIIN **** */
 
+.song-item-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.song-item-btn:hover {
+  color: #1DB954;
+}
+.song-item-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
 
-/* ==========================================================================
-   6. RESPONSIIVNE DISAIN (Mobiilivaade)
-   ========================================================================== */
-   @media (max-width: 720px) {
-  .content-wrapper {
-    flex-direction: column;
-  }
-
-  /* Hide your Sidebar on Mobile Globally */
+  /* RESPONSIVE styles Hide your Sidebar on Mobile Globally */
+/* 📱 RESPONSIVE – väikestel ekraanidel sidebar peidetakse */
 @media (max-width: 767px) {
-	.sidebar { display: none; }
-}
- .sidebar {
-    width: 100%;
-    order: -1;
-    border-left: none;
-    border-bottom: 1px solid #282828;
-    height: auto;
-    overflow-y: visible;
-    padding: 1rem;
+  .content-wrapper {
+    flex-direction: column; /* Stack main + sidebar vertikaalselt */
+    padding-bottom: 110px; /* Sama padding nagu desktop */
   }
+
   .main-content {
-    padding: 1rem;
+    max-width: 100%; /* Mobile'is võtab kogu laiuse */
+    padding: 0.5rem; /* Väiksem padding mobile'is */
+  }
+
+  .sidebar {
+    display: none; /* Peidame sidebar väikestel ekraanidel */
   }
 }
 
-/* =========================================================================
-=================== PARANDUS HORISONTAALSETE RIDADE JAOKS ==================
-========================================================================= */
+/* ========= PARANDUS HORISONTAALSETE RIDADE JAOKS ============= */
 
-/* Konteiner, mis teeb sisu horisontaalseks ja keritavaks */
 .horizontal-music-list, .horizontal-playlist-grid {
   display: flex;
   overflow-x: auto; /* Luba horisontaalne kerimine */
   gap: 1.5rem;
   padding: 1rem 0.5rem; /* Lisame veidi paddingut, et kaardid ei oleks ääres kinni */
 
-  /* Esteetiline täiustus kerimisribale */
   scrollbar-width: thin;
   scrollbar-color: #555 #1a1a1a;
 }  
 
-/* Stiilid laulu- ja playlisti-kaartidele, mis on horisontaalses reas */
-/* .song-item ja .playlist-card peavad olema olemas, see on spetsiifilisem reegel */
 .horizontal-music-list .song-item, 
 .horizontal-playlist-grid .playlist-card {
   flex: 0 0 160px; /* Fikseeritud laius: ei kasva, ei kahane */
-  /* Siia võid lisada veel stiile, nt background-color, border-radius jne */
 }
 
-/* =========================================================
-======================== BROWSE SONGS styles ===============
-========================================================== */
-/* Lisa see oma App.css faili lõppu */
-
+/* ============= BROWSE SONGS styles ============ */
 .browse-page h2 {
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #333;
   padding-bottom: 1rem;
 }
 
-/* See reegel muudab MusicListi välimust AINULT sirvimise lehel */
 .song-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1.5rem;
 }
 
-/* Eemaldame song-item'ilt fikseeritud laiuse, kui see on grid'i sees */
 .song-grid .song-item {
   flex: none; /* Nullime flex omadused */
   width: auto; /* Laseme gridil laiuse määrata */
 }
 
-/* =================================================================
-==================== Browse Playlist styles  ======================
-================================================================== */
+/* ========= Browse Playlist styles  ============ */
 
 .playlist-grid {
   display: grid;
@@ -484,9 +455,7 @@ body {
   margin-top: 1rem;
 }
 
-/* =====================================================
-================ PlaylistDetailPage styles =============
-===================================================== */
+/* ============= PlaylistDetailPage styles ========== */
 .playlist-detail-page .playlist-header {
   display: flex;
   align-items: flex-end;
@@ -511,9 +480,7 @@ body {
   font-weight: bold;
 }
 
-/* ============================================================
-==== Frontpage playlist styles 
-===============================================================*/
+/* ======= Frontpage playlist styles ===========*/
 .playlist-card-info {
   text-align: left;
   flex-grow: 1; /* Tagab, et infoosa võtab vaba ruumi kaardil */
@@ -523,9 +490,8 @@ body {
 .playlist-card-description {
   font-size: 0.85em;
   color: #b3b3b3;
-  /* Järgnevad 3 rida teevad kärpimise maagia */
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Mitu rida kuvatakse */
+  -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;  
   overflow: hidden;
@@ -533,9 +499,7 @@ body {
   margin-top: 0.25rem;
 }
 
-/* ===============================================================
-== See muudab MusicListi vertikaalseks nimekirjaks sellel lehel ==
-=============================================================== */
+/* ====== See muudab MusicListi vertikaalseks nimekirjaks sellel lehel ========== */
 .vertical-music-list {
   display: flex;
   flex-direction: column;
@@ -555,7 +519,6 @@ body {
   background-color: #282828;
 }
 
-/* SongDetailPage styles */
 .song-detail-page .song-detail-header {
   display: flex;
   align-items: center;
@@ -600,9 +563,7 @@ body {
   border-top: 1px solid #333;
 }
 
-/*========================================================
-SONG CARD IMAGE CONTAINER styles
-###########################################################*/
+/*========= SONG CARD IMAGE CONTAINER styles ######### */
 .song-item-artwork {
   width: 100%;
   padding-bottom: 100%; /* See teeb konteineri ruudukujuliseks (1:1 suhtega) */
@@ -622,7 +583,6 @@ SONG CARD IMAGE CONTAINER styles
   object-fit: cover; /* Tagab, et pilt täidab ruumi korrektselt */
 }
 
-/* Vaike-pildi stiil */
 .default-artwork {
   display: flex;
   align-items: center;
@@ -630,7 +590,6 @@ SONG CARD IMAGE CONTAINER styles
   background-color: #282828;
 }
 
-/* Laulukaardi info paigutus */
 .song-item-info {
   text-align: left;
 }
@@ -645,7 +604,6 @@ SONG CARD IMAGE CONTAINER styles
   color: #b3b3b3;
 }
 
-/* Playeri pildi stiilid */
 .player-song-info {
   min-width: 180px; /* Anname miinimumlaiuse */
 }
@@ -672,10 +630,6 @@ SONG CARD IMAGE CONTAINER styles
   background-color: #282828;
 }
 
-/* .player-song-details {
-  See on uus, et tekst oleks pildi kõrval korrektselt 
-}
-*/
 .player-song-info {
   /* Muudame olemasolevat reeglit */
   display: flex;
@@ -684,9 +638,7 @@ SONG CARD IMAGE CONTAINER styles
   min-width: 180px; /* Anname miinimumlaiuse */
 }
 
-/* ===========================================================================
-SIDEBAR STATS styles
-=============================================================== */
+/* ===========SIDEBAR STATS styles ============== */
 .stats-header {
   display: flex;
   justify-content: space-between;
@@ -717,15 +669,12 @@ SIDEBAR STATS styles
   animation: spin 1s linear infinite; /* Lisame laadimise animatsiooni */
 }
 
-/* Animatsioon laadimise jaoks */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-/* ======================================================
-======== AddToPlaylist nupp SongItem sees 
-======================================================== S*/
+/* ======= AddToPlaylist nupp SongItem sees ============ */
 .song-item { position: relative; }
 .add-to-playlist-btn {
   position: absolute;
@@ -741,12 +690,10 @@ SIDEBAR STATS styles
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  /* JÄTA OPACITY VÄLJA, et nupp oleks alati nähtav */
   transition: background-color 0.2s;
 }
 .add-to-playlist-btn:hover { background-color: #1DB954; }
 
-/* Modaalaken */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.7);
@@ -758,9 +705,7 @@ SIDEBAR STATS styles
 }
 .modal-content select { width: 100%; padding: 0.75rem; margin-bottom: 1rem; }
 
-/* ==================================================
-====== Stiilid AddToPlaylistModal jaoks =========
-=================================================== */
+/* ==== Stiilid AddToPlaylistModal jaoks ============================= */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -826,4 +771,295 @@ SIDEBAR STATS styles
 .playlist-selection button:disabled {
   background-color: #555;
   cursor: not-allowed;
+}
+
+/* ===== SEARCH box styles ===== */
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+.search-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 20px;
+  border: none;
+  background-color: #333;
+  color: #fff;
+}
+.search-input::placeholder {
+  color: #aaa;
+}
+.search-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background-color: #1DB954;
+  color: black;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+}
+.search-button:hover {
+  background-color: #1ed760;
+}
+
+/* VIEW DETAILS LIN styles */
+.view-details-link {
+  color: #1DB954;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+.view-details-link:hover {
+  text-decoration: underline;
+}
+
+/* ========= ÜHTSED NUPPUDE STIILID ================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s, transform 0.1s ease-in-out;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* Väike ümmargune ikoon-nupp */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+}
+.btn-icon:hover {
+  background-color: #1DB954;
+  color: #000;
+}
+
+/* Lai ikooniga nupp (nt modal sees, Add to Playlist) */
+.btn-wide {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  background-color: #1DB954;
+  color: black;
+}
+.btn-wide:disabled {
+  background-color: #444;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Tekstinupp – nt „View details“ link, kui ei kasuta react-router Link-i */
+.btn-text {
+  background: none;
+  border: none;
+  color: #1DB954;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9em;
+}
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+/* ======= ALPHA BÄNNERI STIIILID ========== */
+.alpha-status-banner {
+  padding: 1rem;
+  background-color: #292929;
+  border-left: 4px solid orange;
+  margin-bottom: 1.5rem;
+}
+.alpha-status-banner h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: orange;
+}
+.highlight-alpha {
+  color: #1DB954;
+}
+
+/* Pagination ja AlphaBeta Filter styles */
+.alphabet-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.alphabet-filter button {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.alphabet-filter button.active {
+  background-color: #1DB954;
+  color: black;
+  font-weight: bold;
+}
+.alphabet-filter button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.pagination button {
+  background: #1DB954;
+  color: black;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.pagination button:disabled {
+  background: #444;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Search result page styles */
+.search-results-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* mingid stiilid CREATE PLAYLIST PAGE jaoks */
+.song-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.song-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.playlist-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.playlist-preview {
+  border: 1px solid #333;
+  padding: 1rem;
+  border-radius: 6px;
+  background-color: #181818;
+}
+.playlist-preview h4 {
+  margin-top: 0;
+}
+
+/* ADD MUSIC PAGE uued lisa styled */
+.warning-message {
+  background-color: #331c1c;
+  color: #ffbbbb;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #aa4444;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 4px;
+}
+
+/* Add Music Form styles */
+.add-music-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.add-music-container h1 {
+  margin-bottom: 2rem;
+  color: #e8eaed;
+}
+
+.add-music-form {
+  background: #2c3444;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #e8eaed;
+}
+
+.publish-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.publish-button:hover:not(:disabled) {
+  background: #5B9FEF;
+}
+
+.publish-button:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+.file-info {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #b3b3b3;
+}
+
+.error-message {
+  background-color: #331c1c;
+  color: #ffbbbb;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #aa4444;
+}
+
+.success-message {
+  background-color: #1c331c;
+  color: #bbffbb;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #44aa44;
 }
