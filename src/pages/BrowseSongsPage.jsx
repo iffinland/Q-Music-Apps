@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MusicList from '../components/MusicList';
+import Pagination from '../components/Pagination';
 
 /* global qortalRequest */
 
@@ -9,10 +10,11 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
   const [songs, setSongs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [totalSongs, setTotalSongs] = useState(0);
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const currentLetter = searchParams.get('letter') || 'ALL';
-  const limit = 50;
+  const itemsPerPage = 20;
 
   useEffect(() => {
     const fetchPaginatedSongs = async () => {
@@ -26,12 +28,30 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
       }
 
       try {
+        // 1. Esmalt hankime koguste info (ilma offset/limit'ta)
+        const countRequestObject = {
+          action: "SEARCH_QDN_RESOURCES",
+          service: "AUDIO",
+          limit: 1000, // Suur number, et saada koguarvuks võimalikult täpne tulem
+        };
+
+        if (currentLetter !== 'ALL') {
+          countRequestObject.name = currentLetter;
+          countRequestObject.prefix = true;
+          countRequestObject.exactMatchNames = false;
+        }
+
+        const countResults = await qortalRequest(countRequestObject);
+        const totalCount = Array.isArray(countResults) ? countResults.length : 0;
+        setTotalSongs(totalCount);
+
+        // 2. Siis hankime tegelikud tulemused paginatsiooniga
         const requestObject = {
           action: "SEARCH_QDN_RESOURCES",
           service: "AUDIO",
           includeMetadata: true,
-          limit,
-          offset: (currentPage - 1) * limit,
+          limit: itemsPerPage,
+          offset: (currentPage - 1) * itemsPerPage,
           reverse: true
         };
 
@@ -126,21 +146,14 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
         )}
       </div>
 
-      <div className="pagination">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage <= 1 || isLoading}
-        >
-          « Previous
-        </button>
-        <span>Page {currentPage}</span>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={songs.length < limit || isLoading}
-        >
-          Next »
-        </button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalSongs}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        isLoading={isLoading}
+        itemType="songs"
+      />
     </div>
   );
 }

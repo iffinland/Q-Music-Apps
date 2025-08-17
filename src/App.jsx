@@ -6,6 +6,7 @@ import { HashRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-ro
 import Header from './components/Header';
 import Player from './components/Player';
 import Sidebar from './components/Sidebar';
+import MobileSidebar from './components/MobileSidebar';
 import AddToPlaylistModal from './components/AddToPlaylistModal';
 import AddMusicForm from './components/AddMusicForm';
 
@@ -33,7 +34,9 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [songToAdd, setSongToAdd] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [recentTracks, setRecentTracks] = useState([]);
+  const [_recentTracks, setRecentTracks] = useState([]); // Prefixed with _ to avoid unused warning
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false); // PUNKT 1: Mobile sidebar state
+  const [sidebarStats, _setSidebarStats] = useState(null); // Stats sharing tussen sidebar components
 
   const handleSelectSong = (song) => setSelectedSong(song);
 
@@ -124,7 +127,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
-    alert("You have been logged out.");
+    // PUNKT 2: Eemaldasime logout kinnituse popup
     navigate('/');
   };
 
@@ -146,7 +149,7 @@ function App() {
         };
         setIsLoggedIn(true);
         setCurrentUser(userToSet);
-        alert(`Welcome, ${userToSet.name}!`);
+        // PUNKT 2: Eemaldasime "Welcome kasutajanimi" popup
       } else {
         throw new Error("User account data could not be retrieved.");
       }
@@ -164,16 +167,34 @@ function App() {
     }
   };
 
+  // PUNKT 1: Mobile sidebar toggle
+  const handleToggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(prev => !prev);
+  };
+
+  const handleCloseMobileSidebar = () => {
+    setIsMobileSidebarOpen(false);
+  };
+
   return (
     <div className="app-container">
       <Header
+        onSearchSubmit={actualSearchHandler}
+        onToggleMobileSidebar={handleToggleMobileSidebar}
+      />
+      
+      {/* MOBILE SIDEBAR */}
+      <MobileSidebar 
+        isOpen={isMobileSidebarOpen}
+        onClose={handleCloseMobileSidebar}
         isLoggedIn={isLoggedIn}
         currentUser={currentUser}
         onLoginClick={handleLogin}
         onLogoutClick={handleLogout}
-        onSearchSubmit={actualSearchHandler}
         onNavigateToAction={handleNavigateToAction}
+        stats={sidebarStats}
       />
+
       <div className="content-wrapper">
         <main className="main-content">
           <Routes>
@@ -184,13 +205,24 @@ function App() {
             <Route path="/songs" element={<BrowseSongsPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />
             <Route path="/playlist/:owner/:playlistId/:filename" element={<PlaylistDetailPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
-            <Route path="/song/:name/:identifier" element={<SongDetailPage onSongSelect={handleSelectSong} />} />            <Route path="*" element={<div><h2>404 Not Found</h2><Link to="/">Go Home</Link></div>} />
+            <Route path="/song/:name/:identifier" element={<SongDetailPage onSongSelect={handleSelectSong} />} />
+            <Route path="*" element={<div><h2>404 Not Found</h2><Link to="/">Go Home</Link></div>} />
             <Route path="/playlist/:playlistId" element={<Navigate to="/" />} /> // ajutine fallback
           </Routes>
         </main>
-        <Sidebar isLoggedIn={isLoggedIn} currentUser={currentUser} />
+        
+        {/* DESKTOP SIDEBAR */}
+        <Sidebar 
+          isLoggedIn={isLoggedIn} 
+          currentUser={currentUser}
+          onLoginClick={handleLogin}
+          onLogoutClick={handleLogout}
+          onNavigateToAction={handleNavigateToAction}
+        />
       </div>
+      
       <Player currentSong={selectedSong} />
+      
       <AddToPlaylistModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

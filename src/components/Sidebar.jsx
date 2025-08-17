@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 /* global qortalRequest */
 
-function Sidebar({ isLoggedIn, currentUser }) {
+function Sidebar({ isLoggedIn, currentUser, onLoginClick, onLogoutClick, onNavigateToAction }) {
   const [stats, setStats] = useState({
     allSongs: '...',
     qmusicSongs: '...',
@@ -66,6 +66,19 @@ function Sidebar({ isLoggedIn, currentUser }) {
 
   return (
     <aside className="sidebar">
+      {/* LOGIN NUPP KÕIGE ÜLESSE ÄÄRDE */}
+      <section className="auth-section">
+        {isLoggedIn && currentUser ? (
+          <button onClick={onLogoutClick} className="sidebar-login-button logout">
+            Log OUT ({currentUser.name})
+          </button>
+        ) : (
+          <button onClick={onLoginClick} className="sidebar-login-button login">
+            Log IN
+          </button>
+        )}
+      </section>
+
       <section className="stats-section">
         <h5><b>S T A T I S T I C S</b></h5>
         <p>ALL QDN audio: {stats.allSongs}</p>
@@ -84,6 +97,29 @@ function Sidebar({ isLoggedIn, currentUser }) {
             />
           </div>
           <p className="user-name">{currentUser.name}</p>
+
+          {/* PUNKT 3: HEADERIST TULNUD NUPUD KASUTAJA NIME ALLA */}
+          <div className="user-actions">
+            <button 
+              className="sidebar-action-btn"
+              onClick={() => onNavigateToAction('/add-music')}
+            >
+              Add NEW Music
+            </button>
+            <button 
+              className="sidebar-action-btn"
+              onClick={() => onNavigateToAction('/create-playlist')}
+            >
+              Create NEW Playlist
+            </button>
+            <button 
+              className="sidebar-action-btn"
+              onClick={() => onNavigateToAction('/my-playlists')}
+            >
+              My Playlists
+            </button>
+            <button className="sidebar-action-btn disabled">My Favorite Playlist</button>
+          </div>
         </section>
       )}
 

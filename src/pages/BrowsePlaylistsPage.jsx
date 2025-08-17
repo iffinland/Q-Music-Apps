@@ -1,6 +1,7 @@
 // src/pages/BrowsePlaylistsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import Pagination from '../components/Pagination';
 
 /* global qortalRequest */
 
@@ -22,9 +23,10 @@ function BrowsePlaylistsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [playlists, setPlaylists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalPlaylists, setTotalPlaylists] = useState(0);
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const limit = 50;
+  const itemsPerPage = 20;
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -37,12 +39,23 @@ function BrowsePlaylistsPage() {
       }
 
       try {
-        // Use EXACT same search pattern as songs - no specific query filter
+        // 1. Esmalt hankime koguste info
+        const countResults = await qortalRequest({
+          action: "SEARCH_QDN_RESOURCES",
+          service: "PLAYLIST",
+          limit: 1000, // Suur number, et saada koguseks võimalikult täpne tulem
+        });
+
+        const totalCount = Array.isArray(countResults) ? countResults.length : 0;
+        setTotalPlaylists(totalCount);
+
+        // 2. Siis hankime tegelikud tulemused paginatsiooniga
         const playlistResults = await qortalRequest({
           action: "SEARCH_QDN_RESOURCES",
           service: "PLAYLIST",
           includeMetadata: true,
-          limit: 50,
+          limit: itemsPerPage,
+          offset: (currentPage - 1) * itemsPerPage,
           reverse: true,
         });
 
@@ -116,11 +129,14 @@ function BrowsePlaylistsPage() {
         )}
       </div>
 
-      <div className="pagination">
-        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1 || isLoading}>« Previous</button>
-        <span>Page {currentPage}</span>
-        <button onClick={() => handlePageChange(currentPage + 1)} disabled={playlists.length < limit || isLoading}>Next »</button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalPlaylists}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        isLoading={isLoading}
+        itemType="playlists"
+      />
     </div>
   );
 }

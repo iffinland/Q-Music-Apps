@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function SearchBox({ onActualSearch, placeholderText = "Type a search term to search for" }) {
+function SearchBox({ onActualSearch, placeholderText = "Search by song title, artist or username" }) {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 

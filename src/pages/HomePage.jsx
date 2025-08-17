@@ -37,7 +37,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     action: "SEARCH_QDN_RESOURCES",
                     service: "AUDIO",
                     includeMetadata: true,
-                    limit: 10,
+                    limit: 15,
                     reverse: true,
                 });
 
@@ -69,7 +69,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     action: "SEARCH_QDN_RESOURCES",
                     service: "PLAYLIST",
                     includeMetadata: true,
-                    limit: 50,
+                    limit: 15,
                     reverse: true
                 });
 
@@ -98,11 +98,11 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
     return (
         <div className="homepage">
             <div className="alpha-status-banner">
-                <h4>The application is currently in <span className="highlight-alpha">ALPHA</span> status.</h4>
+                <h4>APP is currently in <span className="highlight-alpha">ALPHA</span> status and is not currently optimized for mobile.</h4>
             </div>
 
             <section className="horizontal-scroll-section">
-                <h2>Latest uploaded songs</h2>
+                <h2>Recently published songs</h2>
                 {isLoading ? (
                     <p>Loading songs...</p>
                 ) : (
