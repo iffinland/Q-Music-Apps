@@ -13,6 +13,7 @@ import AddMusicForm from './components/AddMusicForm';
 // Lehed
 import HomePage from './pages/HomePage';
 import CreatePlaylistPage from './pages/CreatePlaylistPage';
+import MyPlaylistsPage from './pages/MyPlaylistsPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import BrowseSongsPage from './pages/BrowseSongsPage';
 import BrowsePlaylistsPage from './pages/BrowsePlaylistsPage';
@@ -64,7 +65,12 @@ function App() {
     setIsModalOpen(false);
 
     try {
-      const info = await qortalRequest({ action: 'SEARCH_QDN_RESOURCES', identifier: playlistIdentifier, limit: 1 });
+      const info = await qortalRequest({ 
+        action: 'SEARCH_QDN_RESOURCES', 
+        service: 'PLAYLIST',
+        identifier: playlistIdentifier, 
+        limit: 1 
+      });
       if (!info?.[0]) throw new Error("Could not find the playlist to update.");
 
       const publisherName = info[0].name;
@@ -84,7 +90,14 @@ function App() {
         throw new Error("Invalid playlist data received.");
       }
 
-      const newSongEntry = { identifier: song.id, name: song.qdnData.name };
+      // Create proper song entry using correct identifier
+      const songIdentifier = song.qdnData?.identifier || song.id;
+      const songName = song.qdnData?.name || song.artist || "Unknown";
+      
+      const newSongEntry = { 
+        identifier: songIdentifier, 
+        name: songName 
+      };
 
       const songsArray = Array.isArray(playlistData.songs) ? [...playlistData.songs] : [];
       if (songsArray.some(s => s.identifier === newSongEntry.identifier)) {
@@ -107,13 +120,24 @@ function App() {
         service: "PLAYLIST",
         identifier: playlistIdentifier,
         file: updatedFile,
-        title: playlistData.title,
-        description: playlistData.description,
+        title: playlistData.title || playlistData.name,
+        description: playlistData.description || "",
       });
 
-      if (result !== true) throw new Error("API did not confirm the update.");
-      alert("Song added successfully!");
+      console.log("Playlist update result:", result);
+      
+      // Check if result is successful - can be true, transaction object, or array
+      const isSuccess = result === true || 
+                       (result && typeof result === 'object' && result.signature) ||
+                       (Array.isArray(result) && result.length > 0 && result[0].signature);
+      
+      if (!isSuccess) {
+        throw new Error(`API response was: ${JSON.stringify(result)}`);
+      }
+      
+      alert(`Song "${song.title}" added successfully to playlist!`);
     } catch (error) {
+      console.error("Add to playlist error:", error);
       alert(`Failed to add song: ${error.message}`);
     }
   };
@@ -201,6 +225,7 @@ function App() {
             <Route path="/" element={<HomePage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/add-music" element={isLoggedIn ? <AddMusicForm currentUser={currentUser} onMusicAdded={handleMusicAdded} /> : <Navigate to="/" />} />
             <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" />} />
+            <Route path="/my-playlists" element={isLoggedIn ? <MyPlaylistsPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/search" element={<SearchResultsPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/songs" element={<BrowseSongsPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />

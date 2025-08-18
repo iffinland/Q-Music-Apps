@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Pagination from '../components/Pagination';
+import PlatformFilter from '../components/PlatformFilter';
 
 /* global qortalRequest */
 
@@ -26,6 +27,7 @@ function BrowsePlaylistsPage() {
   const [totalPlaylists, setTotalPlaylists] = useState(0);
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const currentPlatform = searchParams.get('platform') || 'all';
   const itemsPerPage = 20;
 
   useEffect(() => {
@@ -40,29 +42,51 @@ function BrowsePlaylistsPage() {
 
       try {
         // 1. Esmalt hankime koguste info
-        const countResults = await qortalRequest({
+        const countRequestObject = {
           action: "SEARCH_QDN_RESOURCES",
           service: "PLAYLIST",
           limit: 1000, // Suur number, et saada koguseks võimalikult täpne tulem
-        });
+        };
+
+        // Platform filter for count
+        if (currentPlatform === 'qmusic') {
+          countRequestObject.identifier = 'qmusic_';
+          countRequestObject.prefix = true;
+        } else if (currentPlatform === 'earbump') {
+          countRequestObject.identifier = 'earbump_';
+          countRequestObject.prefix = true;
+        }
+
+        const countResults = await qortalRequest(countRequestObject);
 
         const totalCount = Array.isArray(countResults) ? countResults.length : 0;
         setTotalPlaylists(totalCount);
 
         // 2. Siis hankime tegelikud tulemused paginatsiooniga
-        const playlistResults = await qortalRequest({
+        const playlistRequestObject = {
           action: "SEARCH_QDN_RESOURCES",
           service: "PLAYLIST",
           includeMetadata: true,
           limit: itemsPerPage,
           offset: (currentPage - 1) * itemsPerPage,
           reverse: true,
-        });
+        };
+
+        // Platform filter for actual results
+        if (currentPlatform === 'qmusic') {
+          playlistRequestObject.identifier = 'qmusic_';
+          playlistRequestObject.prefix = true;
+        } else if (currentPlatform === 'earbump') {
+          playlistRequestObject.identifier = 'earbump_';
+          playlistRequestObject.prefix = true;
+        }
+
+        const playlistResults = await qortalRequest(playlistRequestObject);
 
         if (Array.isArray(playlistResults) && playlistResults.length > 0) {
           const formattedPlaylists = playlistResults.map(item => {
-            const filename = item.filename;
-            const title = item.title || item.metadata?.title || filename?.replace('.json', '') || item.identifier;
+            const filename = item.filename || `${item.identifier}.json`; // Fallback kui filename puudub
+            const title = item.title || item.metadata?.title || (filename ? filename.replace('.json', '') : item.identifier);
             const description = item.description || item.metadata?.description || '';
 
             return {
@@ -71,7 +95,7 @@ function BrowsePlaylistsPage() {
               owner: item.name,
               filename,
               identifier: item.identifier,
-              artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}/${encodeURIComponent(filename?.replace('.json', '.jpg') || item.identifier + '.jpg')}`,
+              artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}`,
               description
             };
           });
@@ -90,15 +114,24 @@ function BrowsePlaylistsPage() {
     };
 
     fetchPlaylists();
-  }, [currentPage]);
+  }, [currentPage, currentPlatform]);
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 1) setSearchParams({ page: newPage.toString() });
+    if (newPage >= 1) setSearchParams({ page: newPage.toString(), platform: currentPlatform });
+  };
+
+  const handlePlatformChange = (platform) => {
+    setSearchParams({ page: '1', platform: platform });
   };
 
   return (
     <div className="page-container browse-page">
       <h2>Browse All Q-Music Playlists</h2>
+
+      <PlatformFilter 
+        currentPlatform={currentPlatform} 
+        onPlatformChange={handlePlatformChange} 
+      />
 
       <div className="browse-results">
         {isLoading ? (

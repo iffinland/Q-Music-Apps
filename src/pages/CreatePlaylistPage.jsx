@@ -1,50 +1,82 @@
-// src/pages/CreatePlaylistPage.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /* global qortalRequest */
 
-// Fallback pildi jaoks
-const ArtworkImage = ({ src, alt }) => {
-  const [isError, setIsError] = useState(false);
-  const DefaultArtwork = () => (
-    <div className="default-artwork">
-      <svg width="40" height="40" viewBox="0 0 24 24">
-        <path fill="#888" d="M19,9H2V11H19V9M19,5H2V7H19V5M2,15H15V13H2V15M17,13V19L22,16L17,13Z" />
-      </svg>
-    </div>
-  );
-  if (isError || !src) return <DefaultArtwork />;
-  return <img src={src} alt={alt} onError={() => setIsError(true)} />;
-};
-
 function CreatePlaylistPage({ currentUser }) {
+  const navigate = useNavigate();
+  
+  // Form state
   const [playlistName, setPlaylistName] = useState('');
+  const [description, setDescription] = useState('');
+  const [coverImage, setCoverImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  
+  // Selection state
   const [userSongs, setUserSongs] = useState([]);
   const [selectedSongs, setSelectedSongs] = useState([]);
-  const [userPlaylists, setUserPlaylists] = useState([]);
+  
+  // UI state
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (!currentUser?.name) return;
 
-    const fetchResources = async () => {
+    const fetchUserSongs = async () => {
       try {
         const resources = await qortalRequest({
-          action: "LIST_QDN_RESOURCES",
+          action: "SEARCH_QDN_RESOURCES",
+          service: "AUDIO",
           name: currentUser.name,
+          identifier: "qmusic_track_",
+          prefix: true,
+          includeMetadata: true,
+          limit: 100
         });
 
-        const songs = resources.filter(r => r.service === "AUDIO" && r.identifier.startsWith("qmusic_song_"));
-        const playlists = resources.filter(r => r.service === "PLAYLIST");
-
-        setUserSongs(songs);
-        setUserPlaylists(playlists);
+        if (Array.isArray(resources)) {
+          const formattedSongs = resources.map(item => ({
+            identifier: item.identifier,
+            name: item.name,
+            title: item.metadata?.title || item.identifier,
+            filename: item.filename
+          }));
+          setUserSongs(formattedSongs);
+        }
       } catch (e) {
-        console.error("Failed loading QDN resources", e);
+        console.error("Failed loading user songs:", e);
       }
     };
 
-    fetchResources();
+    fetchUserSongs();
   }, [currentUser]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setError('Image file too large. Maximum size is 5MB');
+        return;
+      }
+      
+      setCoverImage(file);
+      setError(null);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    } else {
+      setCoverImage(null);
+      setImagePreview(null);
+    }
+  };
 
   const toggleSongSelection = (song) => {
     setSelectedSongs(prev =>
@@ -55,163 +87,226 @@ function CreatePlaylistPage({ currentUser }) {
   };
 
   const handleCreatePlaylist = async () => {
-    if (!playlistName) {
-      alert('Enter playlist name.');
+    if (!playlistName.trim()) {
+      setError('Please enter a playlist name');
       return;
     }
 
-    try {
-      // Create identifier EXACTLY like songs: qmusic_playlist_title_randomcode
-      const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase(); // 8 characters like DsNWg4N9  
-      const cleanTitle = playlistName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-      const identifier = `qmusic_playlist_${cleanTitle}_${randomCode}`;
+    setIsCreating(true);
+    setError(null);
+    setSuccess(false);
 
-      // Prepare playlist data like in GitHub version
+    try {
+      // TÄIELIKULT GARANTEERITUD UNIKAALNE ID
+      const timestamp = Date.now();
+      const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase(); // 8 characters like DsNWg4N9
+      const cleanTitle = playlistName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const identifier = `qmusic_playlist_${cleanTitle}_${timestamp}_${randomCode}`;
+      
+      console.log('=== PLAYLIST CREATION DEBUG ===');
+      console.log('User:', currentUser.name);
+      console.log('Playlist name:', playlistName);
+      console.log('Generated identifier:', identifier);
+      console.log('Timestamp:', timestamp);
+      console.log('Random code:', randomCode);
+      console.log('Clean title:', cleanTitle);
+      console.log('==================================');
+
+      // Prepare playlist data
       const playlistData = {
+        name: playlistName,
         title: playlistName,
-        description: `Playlist created by ${currentUser.name} at ${new Date().toISOString()}`,
+        description: description || `Playlist created by ${currentUser.name}`,
         songs: selectedSongs.map(song => ({
           name: song.name,
-          identifier: song.identifier,
-          service: 'AUDIO'
+          identifier: song.identifier
         })),
         createdAt: new Date().toISOString(),
-        uniqueId: identifier  // Add unique ID to data as well
+        creator: currentUser.name
       };
 
-      // Prepare resources array EXACTLY like songs do in publishService.js
+      // Prepare resources array - create JSON as actual file like songs do
+      const playlistJsonContent = JSON.stringify(playlistData, null, 2);
+      const playlistBlob = new Blob([playlistJsonContent], { type: 'application/json' });
+      const playlistFile = new File([playlistBlob], `${identifier}.json`, { type: 'application/json' });
+
       const resources = [
         {
-          name: currentUser.name, // User name stays same  
+          name: currentUser.name,
           service: "PLAYLIST",
-          identifier, // Unique identifier for each playlist
+          identifier,
           title: playlistName,
-          description: `Playlist created by ${currentUser.name}`,
-          data64: btoa(JSON.stringify(playlistData)),
-          filename: `${cleanTitle}.json`
+          description: description || `Playlist created by ${currentUser.name}`,
+          file: playlistFile,
+          filename: `${identifier}.json`
         }
       ];
 
-      console.log('Publishing playlist with data:', {
-        identifier,
-        playlistData,
-        resources
-      });
+      // Add cover image if provided
+      if (coverImage) {
+        resources.push({
+          name: currentUser.name,
+          service: "THUMBNAIL",
+          identifier,
+          file: coverImage,
+          filename: `${identifier}.${coverImage.name.split('.').pop()}`
+        });
+      }
+
+      console.log('Creating playlist:', { identifier, resources });
 
       const result = await qortalRequest({
         action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
-        resources: resources,
-        encrypt: false
+        resources
       });
 
-      console.log("Publish result:", result);
+      console.log('Playlist creation result:', result);
 
-      // Check if result is an array of transaction objects (successful case)
-      if (Array.isArray(result) && result.length > 0 && result[0].signature) {
-        alert("Playlist created!");
-        setPlaylistName('');
-        setSelectedSongs([]);
-        setUserPlaylists(prev => [...prev, { identifier, filename: `${identifier}.json` }]);
-      } else if (result === true) {
-        // If result is exactly true (also successful)
-        alert("Playlist created!");
-        setPlaylistName('');
-        setSelectedSongs([]);
-        setUserPlaylists(prev => [...prev, { identifier, filename: `${identifier}.json` }]);
-      } else {
-        console.error("Unexpected result format:", result);
-        throw new Error("Failed: " + JSON.stringify(result));
+      // Check success
+      const isSuccess = result === true || 
+                       (result && typeof result === 'object' && result.signature) ||
+                       (Array.isArray(result) && result.length > 0 && result[0].signature);
+
+      if (!isSuccess) {
+        throw new Error(`Creation failed: ${JSON.stringify(result)}`);
       }
+
+      setSuccess(true);
+      setError(null);
+
+      // Loome uue playlist objekti, mis saadetakse UI-sse
+      const newPlaylist = {
+        id: identifier,
+        name: playlistName,
+        description: description || `Playlist created by ${currentUser.name}`,
+        owner: currentUser.name,
+        identifier: identifier,
+        artworkUrl: coverImage ? `/arbitrary/THUMBNAIL/${encodeURIComponent(currentUser.name)}/${encodeURIComponent(identifier)}` : null
+      };
+
+      // Saadame kohe sündmuse
+      window.dispatchEvent(new CustomEvent('playlistCreated', { detail: newPlaylist }));
+
+      // Reset form
+      setPlaylistName('');
+      setDescription('');
+      setCoverImage(null);
+      setImagePreview(null);
+      setSelectedSongs([]);
+
+      // Navigate to home after delay
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (err) {
-      console.error("Playlist creation error:", err);
-      alert("Creation failed: " + err.message);
+      console.error('Failed to create playlist:', err);
+      setError(`Failed to create playlist: ${err.message}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 
   return (
     <div className="form-page-container">
       <h2>Create New Playlist</h2>
-
-      <div className="form-group">
-        <label>Playlist Name</label>
-        <input
-          type="text"
-          value={playlistName}
-          onChange={(e) => setPlaylistName(e.target.value)}
-          placeholder="e.g. My Summer Hits"
-        />
-      </div>
-
-      <h3>Select Your Songs (Optional)</h3>
-      {userSongs.length === 0 ? (
-        <p>You haven't published any songs yet. You can still create an empty playlist.</p>
-      ) : (
-        <div className="song-selection-list">
-          {userSongs.map((song) => (
-            <label key={song.identifier} className="song-checkbox-item">
-              <input
-                type="checkbox"
-                checked={selectedSongs.some(s => s.identifier === song.identifier)}
-                onChange={() => toggleSongSelection(song)}
-              />
-              {song.title || song.filename}
-            </label>
-          ))}
+      
+      {/* Success notification */}
+      {success && (
+        <div className="notification success">
+          Playlist created successfully! Redirecting to home...
         </div>
       )}
 
-      <button onClick={handleCreatePlaylist} disabled={!playlistName}>
-        Create Playlist ({selectedSongs.length} songs selected)
-      </button>
+      {/* Error notification */}
+      {error && (
+        <div className="notification error">
+          {error}
+        </div>
+      )}
 
-      <hr />
+      <form onSubmit={(e) => e.preventDefault()}>
+        {/* Basic Info Section */}
+        <div className="form-group">
+          <label htmlFor="playlistName">Playlist Name <span style={{ color: 'red' }}>*</span></label>
+          <input
+            id="playlistName"
+            type="text"
+            placeholder="Enter playlist name..."
+            value={playlistName}
+            onChange={(e) => setPlaylistName(e.target.value)}
+            disabled={isCreating}
+            required
+          />
+        </div>
 
-      <h2>Your Playlists</h2>
-      {userPlaylists.length === 0 && <p>No playlists created yet.</p>}
+        <div className="form-group">
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            placeholder="Add a description for your playlist..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="form-textarea"
+            rows="3"
+            disabled={isCreating}
+          />
+        </div>
 
-      <div className="playlist-preview-list">
-        {userPlaylists.map((playlist, index) => (
-          <PlaylistSongsRenderer key={index} playlist={playlist} />
-        ))}
-      </div>
-    </div>
-  );
-}
+        <div className="form-group">
+          <label htmlFor="coverImage">Cover Image</label>
+          <input
+            id="coverImage"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={isCreating}
+          />
+          {coverImage && <p className="file-info"><strong>Selected:</strong> {coverImage.name}</p>}
+          {imagePreview && (
+            <div className="image-preview">
+              <img src={imagePreview} alt="Cover preview" />
+            </div>
+          )}
+          <small className="file-hint">Supported: JPG, PNG, GIF (max 5MB)</small>
+        </div>
 
-// 🎧 Loob eelvaate iga playlisti lauludest
-function PlaylistSongsRenderer({ playlist }) {
-  const [songs, setSongs] = useState([]);
+        {/* Song Selection Section */}
+        <div className="form-group">
+          <h3>Select Songs (Optional) - ({selectedSongs.length}/{userSongs.length} selected)</h3>
+          {userSongs.length === 0 ? (
+            <div className="empty-state">
+              <p>No songs found. You can still create an empty playlist and add songs later.</p>
+            </div>
+          ) : (
+            <div className="song-selection-list">
+              {userSongs.map(song => (
+                <label key={song.identifier} className="song-checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={selectedSongs.some(s => s.identifier === song.identifier)}
+                    onChange={() => !isCreating && toggleSongSelection(song)}
+                    disabled={isCreating}
+                  />
+                  <div className="song-checkbox-info">
+                    <div className="song-title">{song.title}</div>
+                    <div className="song-artist">{song.name}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
 
-  useEffect(() => {
-    const fetchSongs = async () => {
-      try {
-        const res = await fetch(`/arbitrary/PLAYLIST/${playlist.name}/${playlist.identifier}/${playlist.filename}`);
-        const data = await res.json();
-        setSongs(data?.songs || []);
-      } catch (err) {
-        console.error("Failed loading playlist preview", err);
-      }
-    };
-
-    fetchSongs();
-  }, [playlist]);
-
-  const getQdnUrl = (s) =>
-    `/arbitrary/AUDIO/${encodeURIComponent(s.name)}/${encodeURIComponent(s.identifier)}/${encodeURIComponent(s.filename)}`;
-
-  return (
-    <div className="playlist-preview">
-      <h4>{playlist.filename.replace('.json', '')}</h4>
-      <ul>
-        {songs.map((s, idx) => (
-          <li key={idx}>
-            <strong>{s.title || s.filename}</strong>
-            <audio controls style={{ width: '100%' }}>
-              <source src={getQdnUrl(s)} type="audio/mpeg" />
-            </audio>
-          </li>
-        ))}
-      </ul>
+        {/* Submit Button */}
+        <button 
+          type="button"
+          onClick={handleCreatePlaylist}
+          disabled={!playlistName.trim() || isCreating}
+        >
+          {isCreating ? 'Creating Playlist...' : 'Create Playlist'}
+        </button>
+      </form>
     </div>
   );
 }

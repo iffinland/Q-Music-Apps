@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MusicList from '../components/MusicList';
 import Pagination from '../components/Pagination';
+import PlatformFilter from '../components/PlatformFilter';
 
 /* global qortalRequest */
 
@@ -14,6 +15,7 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const currentLetter = searchParams.get('letter') || 'ALL';
+  const currentPlatform = searchParams.get('platform') || 'all';
   const itemsPerPage = 20;
 
   useEffect(() => {
@@ -41,6 +43,16 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
           countRequestObject.exactMatchNames = false;
         }
 
+        // Platform filter for count
+        if (currentPlatform === 'qmusic') {
+          // Otsime nii qmusic_song_ kui ka qmusic_track_ (praegu kasutame qmusic_track_)
+          countRequestObject.identifier = 'qmusic_';
+          countRequestObject.prefix = true;
+        } else if (currentPlatform === 'earbump') {
+          countRequestObject.identifier = 'earbump_';
+          countRequestObject.prefix = true;
+        }
+
         const countResults = await qortalRequest(countRequestObject);
         const totalCount = Array.isArray(countResults) ? countResults.length : 0;
         setTotalSongs(totalCount);
@@ -59,6 +71,15 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
           requestObject.name = currentLetter;
           requestObject.prefix = true;
           requestObject.exactMatchNames = false;
+        }
+
+        // Platform filter for actual results
+        if (currentPlatform === 'qmusic') {
+          requestObject.identifier = 'qmusic_';
+          requestObject.prefix = true;
+        } else if (currentPlatform === 'earbump') {
+          requestObject.identifier = 'earbump_';
+          requestObject.prefix = true;
         }
 
         const results = await qortalRequest(requestObject);
@@ -99,16 +120,20 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
     };
 
     fetchPaginatedSongs();
-  }, [currentPage, currentLetter]);
+  }, [currentPage, currentLetter, currentPlatform]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1) {
-      setSearchParams({ page: newPage.toString(), letter: currentLetter });
+      setSearchParams({ page: newPage.toString(), letter: currentLetter, platform: currentPlatform });
     }
   };
 
   const handleLetterChange = (newLetter) => {
-    setSearchParams({ page: '1', letter: newLetter });
+    setSearchParams({ page: '1', letter: newLetter, platform: currentPlatform });
+  };
+
+  const handlePlatformChange = (platform) => {
+    setSearchParams({ page: '1', letter: currentLetter, platform: platform });
   };
 
   const alphabet = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
@@ -116,6 +141,11 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
   return (
     <div className="page-container browse-page">
       <h2>Browse All Songs</h2>
+
+      <PlatformFilter 
+        currentPlatform={currentPlatform} 
+        onPlatformChange={handlePlatformChange} 
+      />
 
       <div className="alphabet-filter">
         {alphabet.map(letter => (

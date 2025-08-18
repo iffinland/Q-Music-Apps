@@ -29,8 +29,14 @@ function AddMusicPage({ currentUser }) {
 
     setIsUploading(true);
     try {
-      const identifier = `qmusic_song_${currentUser.name.replace(/ /g, '_')}_${Date.now()}`;
+      // Loome täiesti unikaalse identifikaatori
+      const timestamp = Date.now();
+      const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const randomCode2 = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const cleanTitle = title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const identifier = `qmusic_track_${cleanTitle}_${timestamp}_${randomCode}_${randomCode2}`;
 
+      // Koostame ressursid: laul, pilt, kirjeldus
       const resources = [
         {
           name: currentUser.name,
@@ -40,30 +46,54 @@ function AddMusicPage({ currentUser }) {
           description: `artist=${artist}`,
           file: songFile,
           filename: songFile.name,
+          compress: false
         }
       ];
-
       if (imageFile) {
+        // Kasutame sama cleanTitle + .jpg
+        const ext = imageFile.name.split('.').pop();
         resources.push({
           name: currentUser.name,
           service: "THUMBNAIL",
           identifier,
           file: imageFile,
-          filename: imageFile.name,
+          filename: `${cleanTitle}.${ext}`,
+          compress: false
         });
       }
 
+      // Avaldame kõik ressursid ühe requestiga
       const result = await qortalRequest({
         action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
-        resources
+        resources,
+        compress: "NONE"  // Explicit keelame ZIP kompressiooni
       });
 
-      if (result !== true) {
+      // Kontrollime edukust
+      const isSuccess = result === true || (Array.isArray(result) && result.length > 0 && result[0].signature);
+      if (!isSuccess) {
         throw new Error("API did not confirm success: " + JSON.stringify(result));
       }
 
-      alert("Song published successfully!");
-      navigate('/'); // Või kustutame kui soovid jääda samale lehele
+      // Loome uue laulu objekti UI jaoks
+      const newTrack = {
+        id: identifier,
+        title,
+        artist,
+        created: timestamp,
+        qdnData: {
+          name: currentUser.name,
+          service: 'AUDIO',
+          identifier
+        },
+        artworkUrl: imageFile ? `/arbitrary/THUMBNAIL/${encodeURIComponent(currentUser.name)}/${encodeURIComponent(identifier)}/${cleanTitle}.${imageFile.name.split('.').pop()}` : null
+      };
+
+      console.log('Created new track object for UI:', newTrack);
+
+      // Lisame uue laulu UI-sse kohe (event + navigeerimine)
+      window.dispatchEvent(new CustomEvent('songPublished', { detail: newTrack }));
+      navigate('/', { state: { refreshSongs: true, newSong: newTrack } });
     } catch (err) {
       alert("Failed to publish: " + (err.message || "Unknown error"));
     } finally {

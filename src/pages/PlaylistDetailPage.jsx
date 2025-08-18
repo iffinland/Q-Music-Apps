@@ -28,19 +28,38 @@ function PlaylistDetailPage({ onSongSelect, onAddToPlaylistClick }) {
 
   useEffect(() => {
     const fetchDetails = async () => {
-      if (!playlistId || !owner || !filename || typeof qortalRequest === 'undefined') return;
+      if (!playlistId || !owner || !filename || typeof qortalRequest === 'undefined') {
+        console.log("Missing parameters:", { playlistId, owner, filename });
+        setIsLoading(false);
+        return;
+      }
+      
       setIsLoading(true);
+      console.log("Fetching playlist:", { playlistId, owner, filename });
 
       try {
-        const data = await fetch(
-          `/arbitrary/PLAYLIST/${encodeURIComponent(owner)}/${encodeURIComponent(playlistId)}/${encodeURIComponent(filename)}`
-        ).then(res => res.json());
+        // Use FETCH_QDN_RESOURCE instead of direct fetch
+        const data = await qortalRequest({
+          action: "FETCH_QDN_RESOURCE",
+          name: decodeURIComponent(owner),
+          service: "PLAYLIST",
+          identifier: decodeURIComponent(playlistId)
+        });
 
+        console.log("Playlist data received:", data);
+
+        if (!data || typeof data !== 'object') {
+          throw new Error("Invalid playlist data received");
+        }
+
+        // Set up playlist metadata
         data.owner = decodeURIComponent(owner);
-        data.title = data.name || filename.replace('.json', '');
+        data.title = data.name || data.title || filename.replace('.json', '');
         setPlaylist(data);
 
         if (Array.isArray(data.songs) && data.songs.length > 0) {
+          console.log("Loading songs from playlist:", data.songs.length);
+          
           const songFetches = data.songs.map(ref =>
             qortalRequest({
               action: "SEARCH_QDN_RESOURCES",
@@ -71,12 +90,20 @@ function PlaylistDetailPage({ onSongSelect, onAddToPlaylistClick }) {
                 id: item.identifier,
                 title: item.metadata?.title || item.filename || item.identifier,
                 artist,
-                qdnData: item,
+                qdnData: {
+                  name: item.name,
+                  identifier: item.identifier,
+                  service: "AUDIO"
+                },
                 artworkUrl: `/arbitrary/THUMBNAIL/${encodeURIComponent(item.name)}/${encodeURIComponent(item.identifier)}/${encodeURIComponent(thumbFile)}`
               };
             });
 
+          console.log("Songs loaded:", foundSongs.length);
           setSongs(foundSongs);
+        } else {
+          console.log("No songs in playlist");
+          setSongs([]);
         }
 
       } catch (e) {
@@ -95,8 +122,8 @@ function PlaylistDetailPage({ onSongSelect, onAddToPlaylistClick }) {
 
   return (
     <div className="page-container playlist-detail-page">
-      <div className="playlist-header">
-        <div className="song-item-artwork" style={{ width: '150px', height: '150px' }}>
+      <div className="playlist-header-vertical">
+        <div className="playlist-artwork-container">
           <ArtworkImage
             src={`/arbitrary/THUMBNAIL/${encodeURIComponent(owner)}/${encodeURIComponent(playlistId)}/${encodeURIComponent(filename.replace('.json', '.jpg'))}`}
             alt={playlist.title}
@@ -105,10 +132,11 @@ function PlaylistDetailPage({ onSongSelect, onAddToPlaylistClick }) {
 
         <div className="playlist-info">
           <h1>{playlist.title || 'Untitled Playlist'}</h1>
-          {playlist.description && <p>{playlist.description}</p>}
-          <span>
-            Created by: <strong>{playlist.owner}</strong> • {songs.length} songs
-          </span>
+          {playlist.description && <p className="playlist-description">{playlist.description}</p>}
+          <div className="playlist-meta">
+            <span>Created by: <strong>{playlist.owner}</strong></span>
+            <span>{songs.length} song{songs.length !== 1 ? 's' : ''}</span>
+          </div>
         </div>
       </div>
 
