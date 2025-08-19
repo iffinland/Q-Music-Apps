@@ -134,7 +134,7 @@ function CreatePlaylistPage({ currentUser }) {
         {
           name: currentUser.name,
           service: "PLAYLIST",
-          identifier,
+          identifier: `qmusic_playlist_${cleanTitle}_${timestamp}_${randomCode}`,
           title: playlistName,
           description: description || `Playlist created by ${currentUser.name}`,
           file: playlistFile,

@@ -23,22 +23,21 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
     const [latestSongs, setLatestSongs] = useState([]);
     const [latestPlaylists, setLatestPlaylists] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [refreshTrigger, setRefreshTrigger] = useState(0); // Uus seisund, et sundida värskendamist
+    const [refreshTrigger, setRefreshTrigger] = useState(0); 
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Kontrollime, kas navigeerisime äsja uue laulu lisamisega
+    
     useEffect(() => {
         if (location.state?.refreshSongs && location.state?.newSong) {
             console.log('Navigation with new song detected:', location.state.newSong);
             setLatestSongs(prev => {
-                // Lisa uus laul ainult kui ID puudub, vanad laulud jäävad alles
                 if (!prev.some(song => song.id === location.state.newSong.id)) {
                     return [location.state.newSong, ...prev];
                 }
                 return prev;
             });
-            // Puhasta navigation state
+
             navigate(location.pathname, { replace: true, state: {} });
         }
     }, [location, navigate]);
@@ -84,7 +83,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     includeMetadata: true,
                     followedOnly: false,
                     excludeBlocked: false,
-                    limit: 50,
+                    limit: 10,
                     offset: 0,
                     reverse: true,
                     names: [],
@@ -103,11 +102,10 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     
                                         const formattedSongs = songResults.map(item => {
                         let finalArtist = item.name || "Unknown";
-                        // Ei kasuta metadata, sest QDN vastuses seda pole
                         
                         return {
                             id: item.identifier,
-                            title: item.identifier, // Kasutame identifikaatorit pealkirjana
+                            title: item.identifier, 
                             artist: finalArtist,
                             created: item.created || 0, // QDN annab created otse
                             qdnData: {
