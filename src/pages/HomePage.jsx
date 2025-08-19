@@ -89,8 +89,8 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     names: [],
                     keywords: [],
                     exactMatchNames: true,
-                    prefix: false
-                });
+                    prefix: false,
+                    });
 
                 console.log('QDN SEARCH RESULTS:', songResults?.length || 0, 'songs found');
                 if (Array.isArray(songResults) && songResults.length > 0) {
@@ -132,12 +132,22 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
 
                 // Use EXACT same search pattern as songs - no specific query filter
                 const playlistResults = await qortalRequest({
-                    action: "SEARCH_QDN_RESOURCES",
-                    service: "PLAYLIST",
-                    includeMetadata: true,
-                    limit: 15,
-                    reverse: true
-                });
+                        action: "SEARCH_QDN_RESOURCES",
+                        service: "PLAYLIST",
+                        identifier: "qmusic_playlist",
+                        default: false,
+                        includeStatus: false,
+                        includeMetadata: true,
+                        followedOnly: false,
+                        excludeBlocked: false,
+                        limit: 10,
+                        offset: 0,
+                        reverse: true,
+                        names: [],
+                        keywords: [],
+                        exactMatchNames: true,
+                        prefix: false,
+                    });
 
                 if (Array.isArray(playlistResults) && playlistResults.length > 0) {
                     setLatestPlaylists(playlistResults.map(p => ({

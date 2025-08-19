@@ -254,7 +254,7 @@ function CreatePlaylistPage({ currentUser }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="coverImage">Cover Image</label>
+          <label htmlFor="coverImage">Cover Image (5MB - 1024x1024 px limit)</label>
           <input
             id="coverImage"
             type="file"

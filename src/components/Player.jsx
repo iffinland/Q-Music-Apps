@@ -31,7 +31,7 @@ function Player({ currentSong }) {
       
       // Väldime tarbetut uuesti laadimist
       if (audioEl.src.endsWith(audioUrl)) {
-        if (audioEl.paused) audioEl.play().catch(e => console.warn("Autoplay blocked"));
+        if (audioEl.paused) audioEl.play().catch(() => console.warn("Autoplay blocked"));
         setIsLoadingSong(false);
         return;
       }
