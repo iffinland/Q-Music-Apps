@@ -1,6 +1,6 @@
 // src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import MusicList from '../components/MusicList';
 
 /* global qortalRequest */
@@ -23,46 +23,6 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
     const [latestSongs, setLatestSongs] = useState([]);
     const [latestPlaylists, setLatestPlaylists] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [refreshTrigger, setRefreshTrigger] = useState(0); 
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    
-    useEffect(() => {
-        if (location.state?.refreshSongs && location.state?.newSong) {
-            console.log('Navigation with new song detected:', location.state.newSong);
-            setLatestSongs(prev => {
-                if (!prev.some(song => song.id === location.state.newSong.id)) {
-                    return [location.state.newSong, ...prev];
-                }
-                return prev;
-            });
-
-            navigate(location.pathname, { replace: true, state: {} });
-        }
-    }, [location, navigate]);
-
-    // Käsitleme songPublished sündmust
-    useEffect(() => {
-        const handleSongPublished = (event) => {
-            console.log('Song published event received:', event.detail);
-            // Lisame uue laulu kohe UI-sse
-            setLatestSongs(prev => {
-                // Kontrolli, et ei lisaks sama laulu mitu korda
-                if (!prev.some(song => song.id === event.detail.id)) {
-                    return [event.detail, ...prev];
-                }
-                return prev;
-            });
-            // Käivitame täieliku värskendamise
-            setRefreshTrigger(prev => prev + 1);
-        };
-
-        window.addEventListener('songPublished', handleSongPublished);
-        return () => {
-            window.removeEventListener('songPublished', handleSongPublished);
-        };
-    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -73,41 +33,25 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
             }
 
             try {
-                // Kõige lihtsam otsing - lihtsalt kõik AUDIO ressursid
                 const songResults = await qortalRequest({
                     action: "SEARCH_QDN_RESOURCES",
                     service: "AUDIO",
-                    identifier: "qmusic_track",
-                    default: false,
-                    includeStatus: false,
                     includeMetadata: true,
-                    followedOnly: false,
-                    excludeBlocked: false,
-                    limit: 10,
-                    offset: 0,
+                    limit: 15,
                     reverse: true,
-                    names: [],
-                    keywords: [],
-                    exactMatchNames: true,
-                    prefix: false,
-                    });
-
-                console.log('QDN SEARCH RESULTS:', songResults?.length || 0, 'songs found');
-                if (Array.isArray(songResults) && songResults.length > 0) {
-                    console.log('All identifiers found:', songResults.map(s => s.identifier));
-                }
+                });
 
                 if (Array.isArray(songResults)) {
-                    console.log('Processing songs:', songResults.length);
-                    
-                                        const formattedSongs = songResults.map(item => {
+                    const formattedSongs = songResults.map(item => {
                         let finalArtist = item.name || "Unknown";
-                        
+                        if (item.metadata?.description?.includes('artist=')) {
+                            const match = item.metadata.description.match(/artist=([^;]+)/);
+                            if (match?.[1]) finalArtist = match[1].trim();
+                        }
                         return {
                             id: item.identifier,
-                            title: item.identifier, 
+                            title: item.metadata?.title || item.identifier,
                             artist: finalArtist,
-                            created: item.created || 0, // QDN annab created otse
                             qdnData: {
                                 name: item.name,
                                 service: 'AUDIO',
@@ -117,37 +61,17 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                         };
                     });
 
-                    // Sort by creation time, newest first
-                    formattedSongs.sort((a, b) => b.created - a.created);
-                    
-                    console.log('SORTED SONGS TOP 5:', formattedSongs.slice(0, 5).map(s => ({ 
-                        id: s.id, 
-                        title: s.title,
-                        created: s.created 
-                    })));
-
-                    // Lihtsalt pane laulud esilehele
                     setLatestSongs(formattedSongs);
                 }
 
                 // Use EXACT same search pattern as songs - no specific query filter
                 const playlistResults = await qortalRequest({
-                        action: "SEARCH_QDN_RESOURCES",
-                        service: "PLAYLIST",
-                        identifier: "qmusic_playlist",
-                        default: false,
-                        includeStatus: false,
-                        includeMetadata: true,
-                        followedOnly: false,
-                        excludeBlocked: false,
-                        limit: 10,
-                        offset: 0,
-                        reverse: true,
-                        names: [],
-                        keywords: [],
-                        exactMatchNames: true,
-                        prefix: false,
-                    });
+                    action: "SEARCH_QDN_RESOURCES",
+                    service: "PLAYLIST",
+                    includeMetadata: true,
+                    limit: 15,
+                    reverse: true
+                });
 
                 if (Array.isArray(playlistResults) && playlistResults.length > 0) {
                     setLatestPlaylists(playlistResults.map(p => ({
@@ -169,7 +93,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
         };
 
         fetchData();
-    }, [refreshTrigger]); // Lisa refreshTrigger sõltuvusena, et kutsuda värskendamist
+    }, []);
 
     return (
         <div className="homepage">

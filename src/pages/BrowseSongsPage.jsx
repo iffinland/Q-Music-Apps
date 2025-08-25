@@ -45,7 +45,6 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
 
         // Platform filter for count
         if (currentPlatform === 'qmusic') {
-          // Otsime nii qmusic_song_ kui ka qmusic_track_ (praegu kasutame qmusic_track_)
           countRequestObject.identifier = 'qmusic_';
           countRequestObject.prefix = true;
         } else if (currentPlatform === 'earbump') {

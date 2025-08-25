@@ -69,7 +69,7 @@ function App() {
         action: 'SEARCH_QDN_RESOURCES', 
         service: 'PLAYLIST',
         identifier: playlistIdentifier, 
-        limit: 10 
+        limit: 1 
       });
       if (!info?.[0]) throw new Error("Could not find the playlist to update.");
 
@@ -80,7 +80,7 @@ function App() {
       }
 
       const playlistData = await qortalRequest({
-        action: "SEARCH_QDN_RESOURCE",
+        action: "FETCH_QDN_RESOURCE",
         name: publisherName,
         service: "PLAYLIST",
         identifier: playlistIdentifier,
@@ -115,7 +115,7 @@ function App() {
       );
 
       const result = await qortalRequest({
-        action: "PUBLISH_MULTIPLE_QDN_RESOURCE",
+        action: "PUBLISH_QDN_RESOURCE",
         name: currentUser.name,
         service: "PLAYLIST",
         identifier: playlistIdentifier,

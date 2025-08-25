@@ -97,19 +97,17 @@ function CreatePlaylistPage({ currentUser }) {
     setSuccess(false);
 
     try {
-      // TÄIELIKULT GARANTEERITUD UNIKAALNE ID
+      // Create unique identifier - same pattern as AddMusicPage but with extra randomness
       const timestamp = Date.now();
-      const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase(); // 8 characters like DsNWg4N9
-      const cleanTitle = playlistName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-      const identifier = `qmusic_playlist_${cleanTitle}_${timestamp}_${randomCode}`;
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      const identifier = `qmusic_playlist_${currentUser.name.replace(/ /g, '_')}_${timestamp}_${randomSuffix}`;
       
       console.log('=== PLAYLIST CREATION DEBUG ===');
       console.log('User:', currentUser.name);
       console.log('Playlist name:', playlistName);
       console.log('Generated identifier:', identifier);
       console.log('Timestamp:', timestamp);
-      console.log('Random code:', randomCode);
-      console.log('Clean title:', cleanTitle);
+      console.log('Random suffix:', randomSuffix);
       console.log('==================================');
 
       // Prepare playlist data
@@ -134,7 +132,7 @@ function CreatePlaylistPage({ currentUser }) {
         {
           name: currentUser.name,
           service: "PLAYLIST",
-          identifier: `qmusic_playlist_${cleanTitle}_${timestamp}_${randomCode}`,
+          identifier,
           title: playlistName,
           description: description || `Playlist created by ${currentUser.name}`,
           file: playlistFile,
@@ -173,19 +171,6 @@ function CreatePlaylistPage({ currentUser }) {
 
       setSuccess(true);
       setError(null);
-
-      // Loome uue playlist objekti, mis saadetakse UI-sse
-      const newPlaylist = {
-        id: identifier,
-        name: playlistName,
-        description: description || `Playlist created by ${currentUser.name}`,
-        owner: currentUser.name,
-        identifier: identifier,
-        artworkUrl: coverImage ? `/arbitrary/THUMBNAIL/${encodeURIComponent(currentUser.name)}/${encodeURIComponent(identifier)}` : null
-      };
-
-      // Saadame kohe sündmuse
-      window.dispatchEvent(new CustomEvent('playlistCreated', { detail: newPlaylist }));
 
       // Reset form
       setPlaylistName('');
@@ -254,7 +239,7 @@ function CreatePlaylistPage({ currentUser }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="coverImage">Cover Image (5MB - 1024x1024 px limit)</label>
+          <label htmlFor="coverImage">Cover Image</label>
           <input
             id="coverImage"
             type="file"
