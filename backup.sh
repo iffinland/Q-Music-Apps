@@ -53,9 +53,22 @@ else
         # Loome release'i sildiga, mis vastab failinimele (ilma laiendita)
         RELEASE_TAG="${FILENAME%.tar.gz}"
         
-        # Kasutame --clobber, et 'stable' release'i saaks üle kirjutada
-        gh release create "$RELEASE_TAG" "$BACKUP_PATH" --title "Backup $RELEASE_TAG" --notes "Automated backup created on $(date)" --clobber > /dev/null 2>&1
+        # Kui tegemist on 'stable' backupiga, kustutame vana release'i enne uue loomist.
+        # See tagab ühilduvuse vanemate gh versioonidega, mis ei toeta --clobber lippu.
+        if [ "$1" == "stable" ]; then
+            # Kontrollime, kas release on olemas. Suuname väljundi /dev/null-i, et vältida müra.
+            if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+                echo -e "${YELLOW}Stable release '$RELEASE_TAG' already exists. Deleting it before creating a new one...${NC}"
+                # Kustutame vana release'i. --yes lipp väldib interaktiivset kinnitust.
+                if ! gh release delete "$RELEASE_TAG" --yes; then
+                    echo -e "${RED}Warning: Failed to delete existing stable release. Continuing anyway...${NC}"
+                fi
+            fi
+        fi
         
+        # Loome uue release'i.
+        gh release create "$RELEASE_TAG" "$BACKUP_PATH" --title "Backup $RELEASE_TAG" --notes "Automated backup created on $(date)"
+
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}Successfully uploaded to GitHub Releases.${NC}"
         else
