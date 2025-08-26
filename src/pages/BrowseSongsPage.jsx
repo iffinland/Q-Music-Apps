@@ -6,12 +6,13 @@ import PlatformFilter from '../components/PlatformFilter';
 
 /* global qortalRequest */
 
-function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
+function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick, refreshKey, optimisticSongs = [] }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [songs, setSongs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [totalSongs, setTotalSongs] = useState(0);
+  const [displayedSongs, setDisplayedSongs] = useState([]);
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const currentLetter = searchParams.get('letter') || 'ALL';
@@ -119,7 +120,26 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
     };
 
     fetchPaginatedSongs();
-  }, [currentPage, currentLetter, currentPlatform]);
+  }, [currentPage, currentLetter, currentPlatform, refreshKey]);
+
+  // Kombineerime optimistlikud ja võrgust laetud laulud
+  useEffect(() => {
+    // Kuvame optimistlikke laule ainult esimesel lehel ja kui filtrid klapivad
+    const matchingOptimistic = currentPage === 1
+      ? optimisticSongs.filter(song => {
+          const platformMatch = currentPlatform === 'all' || (song.identifier && song.identifier.startsWith(`qmusic_`));
+          const letterMatch = currentLetter === 'ALL' || (song.artist && song.artist.toUpperCase().startsWith(currentLetter));
+          return platformMatch && letterMatch;
+        })
+      : [];
+
+    const combined = [...matchingOptimistic, ...songs];
+    const unique = combined.reduce((acc, current) => {
+      if (!acc.find(item => item.id === current.id)) acc.push(current);
+      return acc;
+    }, []);
+    setDisplayedSongs(unique);
+  }, [songs, optimisticSongs, currentPage, currentLetter, currentPlatform]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1) {
@@ -167,7 +187,7 @@ function BrowseSongsPage({ onSongSelect, onAddToPlaylistClick }) {
         )}
         {!isLoading && !error && songs.length > 0 && (
           <MusicList
-            songsData={songs}
+            songsData={displayedSongs}
             onSongSelect={onSongSelect}
             onAddToPlaylistClick={onAddToPlaylistClick}
             listClassName="song-grid"

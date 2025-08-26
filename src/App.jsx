@@ -35,20 +35,24 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [songToAdd, setSongToAdd] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [_recentTracks, setRecentTracks] = useState([]); // Prefixed with _ to avoid unused warning
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false); // PUNKT 1: Mobile sidebar state
   const [sidebarStats, _setSidebarStats] = useState(null); // Stats sharing tussen sidebar components
+  const [refreshKey, setRefreshKey] = useState(0); // Key to trigger data refetch
+  const [optimisticSongs, setOptimisticSongs] = useState([]); // Koheseks UI uuenduseks
 
   const handleSelectSong = (song) => setSelectedSong(song);
 
   const handleMusicAdded = (newTrack) => {
+    // 1. Lisame uue laulu koheselt UI-sse (optimistic update)
     if (newTrack) {
-      console.log('Adding new track to UI:', newTrack);
-      setRecentTracks(prev => [newTrack, ...prev]);
-    } else {
-      console.log('Refreshing tracks from QDN...');
-      // Siin võiks olla loogika QDN-ist laulude uuesti laadimiseks
+      console.log('🎵 Optimistically adding new track to UI:', newTrack);
+      setOptimisticSongs(prev => [newTrack, ...prev]);
     }
+    // 2. Käivitame taustal andmete sünkroniseerimise plokiahelaga (väikese viitega)
+    setTimeout(() => {
+      console.log('🎵 Triggering background refresh to sync with blockchain...');
+      setRefreshKey(prevKey => prevKey + 1);
+    }, 5000); // 5-sekundiline viide annab võrgule aega
   };
 
   const handleOpenAddToPlaylistModal = (song) => {
@@ -222,12 +226,12 @@ function App() {
       <div className="content-wrapper">
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<HomePage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
+            <Route path="/" element={<HomePage refreshKey={refreshKey} optimisticSongs={optimisticSongs} onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/add-music" element={isLoggedIn ? <AddMusicForm currentUser={currentUser} onMusicAdded={handleMusicAdded} /> : <Navigate to="/" />} />
             <Route path="/create-playlist" element={isLoggedIn ? <CreatePlaylistPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/my-playlists" element={isLoggedIn ? <MyPlaylistsPage currentUser={currentUser} /> : <Navigate to="/" />} />
             <Route path="/search" element={<SearchResultsPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
-            <Route path="/songs" element={<BrowseSongsPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
+            <Route path="/songs" element={<BrowseSongsPage refreshKey={refreshKey} optimisticSongs={optimisticSongs} onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/playlists" element={<BrowsePlaylistsPage />} />
             <Route path="/playlist/:owner/:playlistId/:filename" element={<PlaylistDetailPage onSongSelect={handleSelectSong} onAddToPlaylistClick={handleOpenAddToPlaylistModal} />} />
             <Route path="/song/:name/:identifier" element={<SongDetailPage onSongSelect={handleSelectSong} />} />

@@ -19,10 +19,11 @@ const ArtworkImage = ({ src, alt }) => {
         : <img src={src} alt={alt} onError={() => setIsError(true)} />;
 };
 
-function HomePage({ onSongSelect, onAddToPlaylistClick }) {
-    const [latestSongs, setLatestSongs] = useState([]);
+function HomePage({ onSongSelect, onAddToPlaylistClick, refreshKey, optimisticSongs = [] }) {
+    const [fetchedSongs, setFetchedSongs] = useState([]);
     const [latestPlaylists, setLatestPlaylists] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [displayedSongs, setDisplayedSongs] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,6 +37,8 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                 const songResults = await qortalRequest({
                     action: "SEARCH_QDN_RESOURCES",
                     service: "AUDIO",
+                    identifier: "qmusic_track_", // <-- OLULINE PARANDUS: Otsime ainult Q-Music laule
+                    prefix: true,             // <-- OLULINE PARANDUS: Kasutame prefiksiga otsingut
                     includeMetadata: true,
                     limit: 15,
                     reverse: true,
@@ -61,7 +64,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                         };
                     });
 
-                    setLatestSongs(formattedSongs);
+                    setFetchedSongs(formattedSongs);
                 }
 
                 // Use EXACT same search pattern as songs - no specific query filter
@@ -93,7 +96,20 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
         };
 
         fetchData();
-    }, []);
+    }, [refreshKey]);
+
+    // See efekt kombineerib koheselt lisatud laulud ja võrgust laetud laulud
+    useEffect(() => {
+        const combined = [...optimisticSongs, ...fetchedSongs];
+        // Eemaldame duplikaadid, et vältida topeltkuvamist pärast sünkroniseerimist
+        const unique = combined.reduce((acc, current) => {
+            if (!acc.find(item => item.id === current.id)) {
+                acc.push(current);
+            }
+            return acc;
+        }, []);
+        setDisplayedSongs(unique);
+    }, [optimisticSongs, fetchedSongs]);
 
     return (
         <div className="homepage">
@@ -107,7 +123,7 @@ function HomePage({ onSongSelect, onAddToPlaylistClick }) {
                     <p>Loading songs...</p>
                 ) : (
                     <MusicList
-                        songsData={latestSongs}
+                        songsData={displayedSongs}
                         onSongSelect={onSongSelect}
                         onAddToPlaylistClick={onAddToPlaylistClick}
                         listClassName="horizontal-music-list"

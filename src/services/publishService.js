@@ -10,10 +10,11 @@ const publishAudio = async (file, metadata, currentUser, imageFile) => {
       throw new Error('This app must be run in the Qortal UI to publish content');
     }
 
-    // Create identifier like Earbump: qmusic_track_title_randomcode
-    const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase(); // 8 characters like DsNWg4N9
+    // Create a guaranteed unique identifier using a timestamp. This is the most reliable way.
+    const timestamp = Date.now();
     const cleanTitle = metadata.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-    const identifier = `qmusic_track_${cleanTitle}_${randomCode}`;
+    const cleanName = currentUser.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    const identifier = `qmusic_track_${cleanName}_${cleanTitle}_${timestamp}`;
 
     // Prepare resources array for publishing
     const resources = [
@@ -49,12 +50,12 @@ const publishAudio = async (file, metadata, currentUser, imageFile) => {
 
     // Check if result is an array of transaction objects (successful case)
     if (Array.isArray(result) && result.length > 0 && result[0].signature) {
-      return { success: true, transactions: result };
+      return { success: true, identifier, transactions: result };
     }
 
     // If result is exactly true (also successful)
     if (result === true) {
-      return { success: true };
+      return { success: true, identifier };
     }
 
     // Otherwise consider it an error

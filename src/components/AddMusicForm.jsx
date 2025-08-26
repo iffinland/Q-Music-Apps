@@ -44,22 +44,27 @@ const AddMusicForm = ({ currentUser, onMusicAdded }) => {
       setError(null);
       setSuccess(false);
 
-      await publishAudio(file, {
+      const publishResult = await publishAudio(file, {
         artist: artist.trim(),
         title: title.trim()
       }, currentUser, imageFile);
 
+      if (!publishResult.success || !publishResult.identifier) {
+        throw new Error("Publishing failed or did not return a unique identifier.");
+      }
+
       // Create the new track object to add immediately to UI
-      const uniqueIdentifier = `qmusic_track_${title.replace(/[^a-zA-Z0-9]/g, '_')}_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
       const newTrack = {
-        id: `${currentUser.name}_AUDIO_${uniqueIdentifier}`,
+        id: publishResult.identifier, // Use the exact identifier from the service
         name: currentUser.name,
         service: 'AUDIO',
-        identifier: uniqueIdentifier,
+        identifier: publishResult.identifier,
         title: title.trim(),
         artist: artist.trim(),
-        thumbnail: null,
-        created: Date.now()
+        // Add properties needed for immediate display
+        artworkUrl: imagePreview, // Use local preview for optimistic update
+        qdnData: { name: currentUser.name, service: 'AUDIO', identifier: publishResult.identifier },
+        created: Date.now(),
       };
 
       console.log('🎵 Created new track object:', newTrack);
@@ -74,16 +79,9 @@ const AddMusicForm = ({ currentUser, onMusicAdded }) => {
       
       // Add the new track immediately to UI and refresh after delay
       if (onMusicAdded) {
-        console.log('📤 Calling onMusicAdded with track:', newTrack.id, newTrack.title);
-        onMusicAdded(newTrack); // Pass the new track data
-        
-        // Also refresh from QDN after delay
-        setTimeout(() => {
-          console.log('🔄 Triggering QDN refresh after 3 seconds...');
-          onMusicAdded(); // Refresh from QDN
-        }, 3000);
-        
-        // Redirect to home after 2 seconds
+        // Anname uue laulu info edasi koheseks (optimistlikuks) kuvamiseks
+        onMusicAdded(newTrack);
+        // Redirect to home after a short delay to show the success message
         setTimeout(() => {
           navigate('/');
         }, 2000);
