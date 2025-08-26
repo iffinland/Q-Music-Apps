@@ -1,4 +1,5 @@
 # Q-Music App 🎵
+Official ALPHA v. 1.0
 
 A decentralized music platform built on the QORTAL blockchain network.
 
