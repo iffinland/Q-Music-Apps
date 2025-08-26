@@ -14,21 +14,70 @@ if [ ! -d "$BACKUP_DIR" ]; then
   exit 1
 fi
 
-# Leiame kõik .tar.gz backup failid
-backups=("$BACKUP_DIR"/*.tar.gz)
+# --- KOGUME VARUKOOPIAD ---
+all_backups=()
+local_backups=()
+
+# 1. Lokaalsed varukoopiad
+echo -e "${YELLOW}Searching for local backups...${NC}"
+# Kasutame `find` et vältida probleeme, kui faile pole
+shopt -s nullglob
+for file in "$BACKUP_DIR"/*.tar.gz; do
+    all_backups+=("$file (local)")
+    local_backups+=("$file")
+done
+shopt -u nullglob
+
+# 2. Kaughaldusega varukoopiad (GitHub Releases)
+if command -v gh &> /dev/null && gh auth status &> /dev/null; then
+    echo -e "${YELLOW}Searching for remote backups on GitHub...${NC}"
+    # Kasutame while read, et vältida probleeme tühikutega failinimedes
+    while IFS= read -r tag; do
+        backup_path="$BACKUP_DIR/${tag}.tar.gz"
+        # Kontrollime, kas see remote backup on juba lokaalselt olemas
+        is_local=false
+        for local_file in "${local_backups[@]}"; do
+            if [[ "$local_file" == "$backup_path" ]]; then
+                is_local=true
+                break
+            fi
+        done
+        
+        if ! $is_local; then
+            all_backups+=("$backup_path (remote)")
+        fi
+    done < <(gh release list --json tagName -q '.[].tagName' 2>/dev/null)
+fi
+
+# Sorteerime tulemused, et uuemad oleks eespool (pööratud sort)
+IFS=$'\n' all_backups=($(sort -r <<<"${all_backups[*]}"))
+unset IFS
 
 # Kontrollime, kas backupe on
-if [ ${#backups[@]} -eq 0 ] || [ ! -e "${backups[0]}" ]; then
-    echo -e "${RED}Error: No backups found in '$BACKUP_DIR'.${NC}"
+if [ ${#all_backups[@]} -eq 0 ]; then
+    echo -e "${RED}Error: No local or remote backups found.${NC}"
     exit 1
 fi
 
 # Kuvame valikud interaktiivses menüüs
 echo -e "${YELLOW}Please choose a backup to restore:${NC}"
 PS3="Enter a number (or any other key to quit): "
-select backup_file in "${backups[@]}"; do
-  if [[ -n "$backup_file" ]]; then
-    echo -e "You have chosen to restore: ${GREEN}$backup_file${NC}"
+select choice in "${all_backups[@]}"; do
+  if [[ -n "$choice" ]]; then
+    # Eemaldame "(local)" või "(remote)" markeri, et saada puhas failitee
+    backup_file_path=$(echo "$choice" | sed -E 's/ \((local|remote)\)$//')
+    echo -e "You have chosen to restore: ${GREEN}$backup_file_path${NC}"
+
+    # Kui on remote, laeme selle esmalt alla
+    if [[ "$choice" == *"(remote)"* ]]; then
+        tag_to_download=$(basename "$backup_file_path" .tar.gz)
+        echo -e "${YELLOW}This is a remote backup. Downloading from GitHub...${NC}"
+        if ! gh release download "$tag_to_download" --pattern "*.tar.gz" --dir "$BACKUP_DIR" --clobber; then
+            echo -e "${RED}Error: Failed to download backup from GitHub.${NC}"
+            exit 1
+        fi
+        echo -e "${GREEN}Download complete.${NC}"
+    fi
 
     # Küsime kinnitust
     read -p "Are you sure? This will overwrite your current files. (y/N) " -n 1 -r
@@ -43,7 +92,7 @@ select backup_file in "${backups[@]}"; do
       tar -czvf "$PRE_RESTORE_FILE" --exclude="./${BACKUP_DIR}" . > /dev/null 2>&1
 
       # Pakime valitud backupi lahti praegusesse kausta, kirjutades failid üle
-      tar -xzf "$backup_file" -C .
+      tar -xzf "$backup_file_path" -C .
 
       echo -e "${GREEN}Restore complete!${NC}"
       echo "It is recommended to run 'npm install' to restore dependencies."
